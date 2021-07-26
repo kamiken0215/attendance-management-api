@@ -11,9 +11,10 @@ import java.util.Date;
 public class Attendance {
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id",insertable = false, updatable = false)
     private User user;
 
+    @Id
     @Column(name = "attendance_date")
     private String attendanceDate;
 
@@ -24,11 +25,11 @@ public class Attendance {
     private Date endTime;
 
     @ManyToOne
-    @JoinColumn(name = "attendance_class_code")
+    @JoinColumn(name = "attendance_class_code",insertable = false, updatable = false)
     private AttendanceClass attendanceClass;
 
     @ManyToOne
-    @JoinColumn(name = "attendance_status_code")
+    @JoinColumn(name = "attendance_status_code",insertable = false, updatable = false)
     private AttendanceStatus attendanceStatus;
 
 }

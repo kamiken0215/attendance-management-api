@@ -12,33 +12,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer usesId;
+    private Integer userId;
 
     @Column(name = "user_name")
     private String userName;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
-
-    private int companyId;
-
-    @ManyToOne
-    @JoinColumn(name = "department_code")
-    private Department department;
-
-    private String departmentCode;
-
-    @ManyToOne
-    @JoinColumn(name = "role_code")
-    private Role role;
-
-    private String roleCode;
-
-    @Column
+    @Column(name = "email")
     private String email;
 
-    @Column
+    @Column(name = "password")
     private String password;
 
     @Column(name = "paid_holidays")
@@ -46,4 +28,27 @@ public class User {
 
     @Column(name = "is_active")
     private String isActive;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
+    private Company company;
+
+    @Column(name = "company_id")
+    private Integer companyId;
+
+    @ManyToOne
+    @JoinColumn(name = "department_code",referencedColumnName = "department_code", insertable = false, updatable = false)
+    private Department department;
+
+    @Column(name = "department_code")
+    private String departmentCode;
+
+    @ManyToOne
+    @JoinColumn(name = "role_code",referencedColumnName = "role_code", insertable = false, updatable = false)
+    private Role role;
+
+    @Column(name = "role_code")
+    private String roleCode;
+
+
 }

@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.config;
 
+import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,15 +11,23 @@ import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
-    private String login;
+    //private String login;
+    private String email;
     private String password;
     private Collection<? extends GrantedAuthority> grantedAuthorities;
 
-    public static CustomUserDetails fromUserEntityToCustomUserDetails(UserEntity userEntity) {
+//    public static CustomUserDetails fromUserEntityToCustomUserDetails(UserEntity userEntity) {
+//        CustomUserDetails c = new CustomUserDetails();
+//        c.login = userEntity.getLogin();
+//        c.password = userEntity.getPassword();
+//        c.grantedAuthorities = Collections.singleton(new SimpleGrantedAuthority(userEntity.getRoleEntity().getName()));
+//        return c;
+//    }
+    public static CustomUserDetails fromUserToCustomUserDetails(User user) {
         CustomUserDetails c = new CustomUserDetails();
-        c.login = userEntity.getLogin();
-        c.password = userEntity.getPassword();
-        c.grantedAuthorities = Collections.singleton(new SimpleGrantedAuthority(userEntity.getRoleEntity().getName()));
+        c.email = user.getEmail();
+        c.password = user.getPassword();
+        c.grantedAuthorities = Collections.singleton(new SimpleGrantedAuthority(user.getRole().getRoleName()));
         return c;
     }
 
@@ -34,7 +43,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return login;
+        return email;
     }
 
     @Override

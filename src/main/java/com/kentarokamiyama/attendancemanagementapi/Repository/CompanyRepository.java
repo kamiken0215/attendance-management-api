@@ -2,7 +2,8 @@ package com.kentarokamiyama.attendancemanagementapi.Repository;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 public interface CompanyRepository extends JpaRepository<Company,Integer> {
-    Company findById(int id);
+    Company findByCompanyId(Integer companyId);
 }
