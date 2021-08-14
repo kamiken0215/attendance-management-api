@@ -13,16 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
 
-//    @Autowired
-//    private UserService userService;
     @Autowired
     private AuthService authService;
-
-//    @Override
-//    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        UserEntity userEntity = userService.findByLogin(username);
-//        return CustomUserDetails.fromUserEntityToCustomUserDetails(userEntity);
-//    }
 
     @Override
     public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

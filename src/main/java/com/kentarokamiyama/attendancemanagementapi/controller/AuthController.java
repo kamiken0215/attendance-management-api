@@ -20,15 +20,6 @@ public class AuthController {
     @Autowired
     private JwtProvider jwtProvider;
 
-//    @PostMapping("/register")
-//    public String registerUser(@RequestBody RegistrationRequest registrationRequest) {
-//        UserEntity u = new UserEntity();
-//        u.setPassword(registrationRequest.getPassword());
-//        u.setLogin(registrationRequest.getLogin());
-//        userService.saveUser(u);
-//        return "OK";
-//    }
-
     @PostMapping("/register")
     public String registerUser(@RequestBody RegistrationRequest registrationRequest) {
         User u = new User();
@@ -44,12 +35,6 @@ public class AuthController {
         return "OK";
     }
 
-//    @PostMapping("/auth")
-//    public AuthResponse auth(@RequestBody AuthRequest authRequest) {
-//        UserEntity userEntity = userService.findByLoginAndPassword(authRequest.getLogin(),authRequest.getPassword());
-//        String token = jwtProvider.generateToken(userEntity.getLogin());
-//        return new AuthResponse(token);
-//    }
     @PostMapping("/auth")
     public AuthResponse auth(@RequestBody AuthRequest authRequest) {
         User user = authService.findByEmailAndPassword(authRequest.getEmail(),authRequest.getPassword());

@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.Repository;
+package com.kentarokamiyama.attendancemanagementapi.repository;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Role;
 import org.springframework.data.jpa.repository.JpaRepository;

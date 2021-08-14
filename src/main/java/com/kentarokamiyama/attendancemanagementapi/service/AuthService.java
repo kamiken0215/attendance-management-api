@@ -1,9 +1,9 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
 
-import com.kentarokamiyama.attendancemanagementapi.Repository.CompanyRepository;
-import com.kentarokamiyama.attendancemanagementapi.Repository.DepartmentRepository;
-import com.kentarokamiyama.attendancemanagementapi.Repository.RoleRepository;
-import com.kentarokamiyama.attendancemanagementapi.Repository.UserRepository;
+import com.kentarokamiyama.attendancemanagementapi.repository.CompanyRepository;
+import com.kentarokamiyama.attendancemanagementapi.repository.DepartmentRepository;
+import com.kentarokamiyama.attendancemanagementapi.repository.RoleRepository;
+import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Company;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Role;

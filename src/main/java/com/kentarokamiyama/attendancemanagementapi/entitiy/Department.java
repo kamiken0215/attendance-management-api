@@ -1,6 +1,9 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "department")
 @Data
 public class Department {
@@ -23,8 +29,4 @@ public class Department {
 
     @Column(name = "company_id")
     private Integer companyId;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    private Company company;
 }

@@ -1,10 +1,16 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user")
 @Data
 public class User {
