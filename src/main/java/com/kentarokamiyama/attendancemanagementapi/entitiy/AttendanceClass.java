@@ -1,10 +1,16 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "attendance_class")
 @Data
 public class AttendanceClass {
@@ -17,6 +23,9 @@ public class AttendanceClass {
     private String attendanceClassName;
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
     private Company company;
+
+    @Column(name = "company_id")
+    private Integer companyId;
 }
