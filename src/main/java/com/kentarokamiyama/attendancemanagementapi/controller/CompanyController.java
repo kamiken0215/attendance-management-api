@@ -27,15 +27,37 @@ public class CompanyController {
     @Autowired
     private AttendanceClassService attendanceClassService;
 
-    @GetMapping("/company")
-    public List<Company> find (HttpServletRequest request, HttpServletResponse response,@RequestBody CompanyRequest companyRequest) {
+    @GetMapping("/companies/{companyId}")
+    public CompanyResponse find (HttpServletRequest request, HttpServletResponse response,
+                                       @PathVariable(value = "companyId") Integer companyId) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (companyService.isNotExistCompany(loginUser, companyRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_FOUND);
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
-        return companyService.find(companyRequest);
+
+        Company result = companyService.findOne(companyId);
+
+        if (result == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return null;
+        } else {
+            return CompanyResponse.builder()
+                    .companyId(result.getCompanyId())
+                    .companyName(result.getCompanyName())
+                    .departments(result.getDepartment())
+                    .build();
+        }
     }
 
     @GetMapping("admin/company")

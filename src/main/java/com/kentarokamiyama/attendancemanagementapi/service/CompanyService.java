@@ -32,6 +32,11 @@ public class CompanyService {
         );
     }
 
+    public Company findOne(Integer companyId) {
+        Optional<Company> opt = companyRepository.findById(companyId);
+        return opt.orElse(null);
+    }
+
     public Company save(Company company) {
         return companyRepository.save(company);
     }
