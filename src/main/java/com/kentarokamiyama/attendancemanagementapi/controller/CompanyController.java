@@ -65,24 +65,56 @@ public class CompanyController {
         return companyService.find(companyRequest);
     }
 
-    @PostMapping("/company")
-    public Company saveCompany (HttpServletRequest request, HttpServletResponse response,@RequestBody CompanyRequest companyRequest) {
+    @PostMapping("/companies")
+    public CompanyResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (companyService.isNotExistCompany(loginUser, companyRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_FOUND);
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyRequest.getCompanyId())
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
-        Company company = new Company();
-        company.setCompanyName(companyRequest.getCompanyName());
-        return companyService.save(company);
+
+        Company company = Company.builder()
+                .companyId(companyRequest.getCompanyId())
+                .companyName(companyRequest.getCompanyName())
+                .build();
+
+        Object result = companyService.save(company);
+        if (result instanceof Company) {
+            Company c = (Company) result;
+            return CompanyResponse.builder()
+                    .companyId(c.getCompanyId())
+                    .companyName(c.getCompanyName())
+                    .build();
+        } else {
+            return CompanyResponse.builder().error(result.toString()).build();
+        }
     }
 
     @PostMapping("admin/company")
-    public Company saveCompany (@RequestBody CompanyRequest companyRequest) {
+    public CompanyResponse saveCompany (@RequestBody CompanyRequest companyRequest) {
         Company company = new Company();
         company.setCompanyName(companyRequest.getCompanyName());
-        return companyService.save(company);
+        Object result = companyService.save(company);
+        if (result instanceof Company) {
+            Company c = (Company) result;
+            return CompanyResponse.builder()
+                    .companyId(c.getCompanyId())
+                    .companyName(c.getCompanyName())
+                    .departments(c.getDepartment())
+                    .build();
+        } else {
+            return CompanyResponse.builder().error(result.toString()).build();
+        }
     }
 
     @DeleteMapping("/company")

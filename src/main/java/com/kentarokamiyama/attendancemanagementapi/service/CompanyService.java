@@ -37,8 +37,13 @@ public class CompanyService {
         return opt.orElse(null);
     }
 
-    public Company save(Company company) {
-        return companyRepository.save(company);
+    public Object save(Company company) {
+        try {
+            return companyRepository.save(company);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "不正なデータです";
+        }
     }
 
     public void delete (Company company) {

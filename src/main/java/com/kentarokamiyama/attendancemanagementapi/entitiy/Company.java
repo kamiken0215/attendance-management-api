@@ -27,6 +27,6 @@ public class Company {
 //    @ManyToOne
 //    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
     @OneToMany(fetch = FetchType.EAGER, cascade= CascadeType.ALL)
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "company_id",updatable = false)
     private List<Department> department;
 }
