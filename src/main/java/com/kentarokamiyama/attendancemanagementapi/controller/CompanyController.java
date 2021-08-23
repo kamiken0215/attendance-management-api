@@ -117,24 +117,33 @@ public class CompanyController {
         }
     }
 
-    @DeleteMapping("/company")
-    public String deleteCompany (HttpServletRequest request,HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
+    @DeleteMapping("/companies/{companyId}")
+    public String deleteCompany (HttpServletRequest request,HttpServletResponse response,
+                                 @PathVariable(value = "companyId") Integer companyId) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (companyService.isNotExistCompany(loginUser, companyRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_FOUND);
-            return "ユーザーが見つかりません";
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
         }
 
-        String checkResult = beforeCompanyDelete(companyRequest.getCompanyId(),loginUser);
+        String checkResult = beforeCompanyDelete(companyId,email);
 
         if (checkResult.length() != 0) {
             response.setStatus(HttpServletResponse.SC_FOUND);
             return checkResult;
         }
 
-        Company company = new Company();
-        company.setCompanyId(companyRequest.getCompanyId());
+        Company company = Company.builder().companyId(companyId).build();
         companyService.delete(company);
 
         return "";
@@ -145,7 +154,7 @@ public class CompanyController {
     //  3.count department
     //  4.count user (except admin user)
     //  4.1~4 each counts 0 -> delete company
-    private String beforeCompanyDelete (Integer companyId,String loginUser) {
+    private String beforeCompanyDelete (Integer companyId,String email) {
 //        UserRequest userRequest = new UserRequest();
 //        userRequest.setCompanyId(companyId);
         User user = User.builder()
@@ -178,7 +187,7 @@ public class CompanyController {
 
         //  4.
         final List<Integer> exceptRootUserIds = users.stream()
-                .filter(u -> !u.getEmail().equals(loginUser))
+                .filter(u -> !u.getEmail().equals(email))
                 .map(User::getUserId)
                 .collect(Collectors.toList());
 
