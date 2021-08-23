@@ -3,6 +3,7 @@ import com.kentarokamiyama.attendancemanagementapi.controller.UserRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.CompanyRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log
 public class UserService {
 
     @Autowired
@@ -21,7 +23,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public List<User> find(UserRequest user) {
+    public List<User> find(User user) {
 
         return userRepository.findAll(Specification
                 .where(UserSpecifications.companyIdContains(user.getCompanyId()))
@@ -33,12 +35,25 @@ public class UserService {
         );
     }
 
+    public Optional<User> findById(Integer userId) {
+        return userRepository.findById(userId);
+    }
+
     public long count (List<Integer> users) {
         return userRepository.findAllById(users).size();
     }
 
-    public User save (User user) {
-        return userRepository.save(user);
+    public Object save (User user) {
+        try {
+            return userRepository.save(user);
+        } catch (Throwable t) {
+           log.severe(t.toString());
+           if (t.getCause().toString().contains("ConstraintViolationException")) {
+               return "メールアドレスを他のものに変更してください";
+           } else {
+               return "再度時間を置いてから実行してください";
+           }
+        }
     }
 
     public void delete (User user) {
@@ -73,5 +88,17 @@ public class UserService {
         } else {
             return true;
         }
+    }
+
+    public User findOne (User user) {
+        Optional<User> userOpt = userRepository.findOne(Specification
+                .where(UserSpecifications.companyIdContains(user.getCompanyId()))
+                .and(UserSpecifications.departmentCodeContains(user.getDepartmentCode()))
+                .and(UserSpecifications.userIdContains(user.getUserId()))
+                .and(UserSpecifications.userNameContains(user.getUserName()))
+                .and(UserSpecifications.emailContains(user.getEmail()))
+                .and(UserSpecifications.roleCodeContains(user.getRoleCode()))
+        );
+        return userOpt.orElse(null);
     }
 }

@@ -92,14 +92,17 @@ public class CompanyController {
     //  4.count user (except admin user)
     //  4.1~4 each counts 0 -> delete company
     private String beforeCompanyDelete (Integer companyId,String loginUser) {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setCompanyId(companyId);
-        List<User> users = userService.find(userRequest);
+//        UserRequest userRequest = new UserRequest();
+//        userRequest.setCompanyId(companyId);
+        User user = User.builder()
+                .companyId(companyId)
+                .build();
+        List<User> users = userService.find(user);
 
         //  1.
-        for (User user : users) {
+        for (User u : users) {
             Attendance attendance = new Attendance();
-            attendance.setUserId(user.getUserId());
+            attendance.setUserId(u.getUserId());
             if (attendanceService.count(attendance) != 0) {
                 return "出勤データが削除されていません";
             }
@@ -121,7 +124,7 @@ public class CompanyController {
 
         //  4.
         final List<Integer> exceptRootUserIds = users.stream()
-                .filter(user -> !user.getEmail().equals(loginUser))
+                .filter(u -> !u.getEmail().equals(loginUser))
                 .map(User::getUserId)
                 .collect(Collectors.toList());
 
