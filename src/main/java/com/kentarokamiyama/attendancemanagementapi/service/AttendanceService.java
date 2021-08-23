@@ -19,12 +19,10 @@ public class AttendanceService {
     @Autowired
     private AttendanceRepository attendanceRepository;
 
-    public List<Attendance> find(AttendanceRequest attendance) {
+    public List<Attendance> find(Attendance attendance) {
         return attendanceRepository.findAll(Specification
                 .where(AttendanceSpecifications.userIdContains(attendance.getUserId()))
                 .and(AttendanceSpecifications.attendanceDateContains(attendance.getAttendanceDate()))
-                .and(AttendanceSpecifications.attendanceClassCodeContains(attendance.getAttendanceClassCode()))
-                .and(AttendanceSpecifications.attendanceStatusCodeContains(attendance.getAttendanceStatusCode()))
         );
     }
 
@@ -38,12 +36,8 @@ public class AttendanceService {
         return attendanceRepository.save(attendance);
     }
 
-    public void delete (Attendance attendance) {
-        List<Attendance> result = attendanceRepository.findAll(Specification
-                .where(AttendanceSpecifications.userIdContains(attendance.getUserId()))
-                .and(AttendanceSpecifications.attendanceDateContains(attendance.getAttendanceDate()))
-        );
-        attendanceRepository.deleteAll(result);
+    public void deleteAll (List<Attendance> attendances) {
+        attendanceRepository.deleteAll(attendances);
     }
 
     public boolean isNotExistUser(Integer userId, String loginUser) {

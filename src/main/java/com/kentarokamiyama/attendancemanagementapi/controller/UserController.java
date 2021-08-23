@@ -264,6 +264,7 @@ public class UserController {
                 .departmentCode(departmentCode)
                 .userId(userId)
                 .build();
+
         userService.delete(user);
     }
 
