@@ -27,7 +27,7 @@ public class AttendanceController {
             "companies/{companyId}/departments/{departmentCode}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
-    public List<Attendance> find (HttpServletRequest request,HttpServletResponse response,
+    public List<AttendanceResponse> find (HttpServletRequest request,HttpServletResponse response,
                                   @PathVariable(value = "companyId") Integer companyId,
                                   @PathVariable(value = "departmentCode",required = false) String departmentCode,
                                   @PathVariable(value = "userId",required = false) Integer userId,
@@ -55,7 +55,23 @@ public class AttendanceController {
                     .attendanceDate(attendanceDate)
                     .build();
 
-            return attendanceService.find(attendance);
+            List<AttendanceResponse> attendanceResponses = new ArrayList<>();
+            List<Attendance> attendances = attendanceService.find(attendance);
+            for (Attendance a : attendances) {
+                AttendanceResponse resp = AttendanceResponse.builder()
+                        .userId(a.getUserId())
+                        .userName(a.getUser().getUserName())
+                        .attendanceDate(a.getAttendanceDate())
+                        .startTime(a.getStartTime())
+                        .endTime(a.getEndTime())
+                        .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClass().getAttendanceClassName())
+                        .attendanceStatusCode(a.getAttendanceStatusCode())
+                        .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
+                        .build();
+                attendanceResponses.add(resp);
+            }
+            return attendanceResponses;
         }
 
         User filterUser =  User.builder()
@@ -64,20 +80,33 @@ public class AttendanceController {
                 .userId(userId)
                 .build();
 
+        List<AttendanceResponse> attendanceResponses = new ArrayList<>();
         List<User> users = userService.find(filterUser);
-        List<Attendance> attendances = new ArrayList<>();
-        int pos = 0;
 
+        //  各ユーザーの出勤データを取得
         for (User u : users) {
             Attendance attendance = Attendance.builder()
                     .userId(u.getUserId())
                     .build();
-            List<Attendance> result = attendanceService.find(attendance);
-            attendances.addAll(pos,result);
-            pos++;
+            List<Attendance> attendances = attendanceService.find(attendance);
+            for (Attendance a : attendances) {
+                AttendanceResponse resp = AttendanceResponse.builder()
+                        .userId(a.getUserId())
+                        .userName(a.getUser().getUserName())
+                        .attendanceDate(a.getAttendanceDate())
+                        .startTime(a.getStartTime())
+                        .endTime(a.getEndTime())
+                        .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClass().getAttendanceClassName())
+                        .attendanceStatusCode(a.getAttendanceStatusCode())
+                        .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
+                        .build();
+                attendanceResponses.add(resp);
+            }
+            attendances.clear();
         }
 
-        return attendances;
+        return attendanceResponses;
     }
 
     @GetMapping("admin/attendance")

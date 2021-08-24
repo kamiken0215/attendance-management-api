@@ -16,10 +16,16 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "attendance")
 @Data
+@IdClass(AttendancePK.class)
 public class Attendance {
 
+    @Id
     @Column(name = "user_id")
     private Integer userId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName = "user_id",insertable = false, updatable = false)
+    private User user;
 
     @Id
     @Column(name = "attendance_date")
