@@ -5,6 +5,7 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@Log
 public class AttendanceController {
 
     @Autowired
@@ -48,6 +50,8 @@ public class AttendanceController {
             return null;
         }
 
+        List<Object> ret = attendanceService.fetchAll(companyId);
+
         //  単一ユーザーの場合
         if (attendanceDate != null) {
             Attendance attendance = Attendance.builder()
@@ -65,7 +69,6 @@ public class AttendanceController {
                         .startTime(a.getStartTime())
                         .endTime(a.getEndTime())
                         .attendanceClassCode(a.getAttendanceClassCode())
-                        .attendanceClassName(a.getAttendanceClass().getAttendanceClassName())
                         .attendanceStatusCode(a.getAttendanceStatusCode())
                         .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
                         .build();
@@ -97,7 +100,6 @@ public class AttendanceController {
                         .startTime(a.getStartTime())
                         .endTime(a.getEndTime())
                         .attendanceClassCode(a.getAttendanceClassCode())
-                        .attendanceClassName(a.getAttendanceClass().getAttendanceClassName())
                         .attendanceStatusCode(a.getAttendanceStatusCode())
                         .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
                         .build();
@@ -120,25 +122,62 @@ public class AttendanceController {
         return attendanceService.find(attendance);
     }
 
-    @PostMapping("/attendance")
-    public Attendance saveAttendance (HttpServletRequest request,@RequestBody AttendanceRequest attendanceRequest) {
+    @PostMapping("/attendances")
+    public AttendanceResponse saveAttendance (HttpServletRequest request,HttpServletResponse response,@RequestBody AttendanceRequest attendanceRequest) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (attendanceService.isNotExistUser(attendanceRequest.getUserId(), loginUser)) {
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(attendanceRequest.getCompanyId())
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        attendance.setStartTime(attendanceRequest.getStartTime());
-        attendance.setEndTime(attendanceRequest.getEndTime());
-        attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
-        attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-        return attendanceService.save(attendance);
+
+        //  本人確認
+        if (attendanceRequest.getUserId() != null) {
+            if (!attendanceRequest.getUserId().equals(authUser.getUserId())) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return null;
+            }
+        }
+
+        Attendance attendance = Attendance.builder()
+                .userId(attendanceRequest.getUserId())
+                .attendanceDate(attendanceRequest.getAttendanceDate())
+                .startTime(attendanceRequest.getStartTime())
+                .endTime(attendanceRequest.getEndTime())
+                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
+                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
+                .build();
+
+        Object result = attendanceService.save(attendance);
+
+        if (result instanceof Attendance) {
+            Attendance a = (Attendance) request;
+            return AttendanceResponse.builder()
+                    .userId(a.getUserId())
+                    .userName(a.getUser().getUserName())
+                    .attendanceDate(a.getAttendanceDate())
+                    .startTime(a.getStartTime())
+                    .endTime(a.getEndTime())
+                    .attendanceClassCode(a.getAttendanceClassCode())
+                    .attendanceStatusCode(a.getAttendanceStatusCode())
+                    .build();
+        } else {
+            return AttendanceResponse.builder().error(result.toString()).build();
+        }
+
     }
 
     @PostMapping("admin/attendance")
-    public Attendance saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
+    public AttendanceResponse saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
         Attendance attendance = new Attendance();
         attendance.setUserId(attendanceRequest.getUserId());
         attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
@@ -146,7 +185,24 @@ public class AttendanceController {
         attendance.setEndTime(attendanceRequest.getEndTime());
         attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
         attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-        return attendanceService.save(attendance);
+
+        Object result = attendanceService.save(attendance);
+
+        if (result instanceof Attendance) {
+            Attendance a = (Attendance) result;
+            return AttendanceResponse.builder()
+                    .userId(a.getUserId())
+                    .userName(a.getUser().getUserName())
+                    .attendanceDate(a.getAttendanceDate())
+                    .startTime(a.getStartTime())
+                    .endTime(a.getEndTime())
+                    .attendanceClassCode(a.getAttendanceClassCode())
+                    .attendanceStatusCode(a.getAttendanceStatusCode())
+                    .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
+                    .build();
+        } else {
+            return AttendanceResponse.builder().error(result.toString()).build();
+        }
     }
 
     @DeleteMapping({"companies/{companyId}/attendances",

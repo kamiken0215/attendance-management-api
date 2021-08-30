@@ -10,5 +10,4 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User,Integer> ,JpaSpecificationExecutor<User>{
     User findByEmail(String email);
     User findByUserId(Integer userId);
-
 }

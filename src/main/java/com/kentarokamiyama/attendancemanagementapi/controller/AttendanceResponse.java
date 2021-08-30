@@ -31,4 +31,5 @@ public class AttendanceResponse {
     private String attendanceClassName;
     private String attendanceStatusCode;
     private String attendanceStatusName;
+    private String error;
 }

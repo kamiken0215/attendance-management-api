@@ -40,7 +40,7 @@ class AttendanceControllerTest {
                 .attendanceDate("20200101")
                 .build();
 
-        Attendance createdAttendance = attendanceService.save(attendance);
+        attendanceService.save(attendance);
 
         List<Attendance> createdAttendances = attendanceService.find(find);
         assertEquals(createdAttendances.get(0).getAttendanceDate(),"20200101");

@@ -5,6 +5,7 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Log
 public class AttendanceService {
 
     @Autowired
@@ -26,14 +28,23 @@ public class AttendanceService {
         );
     }
 
+    public List<Object> fetchAll(Integer companyId) {
+        return attendanceRepository.fetchAll(companyId);
+    }
+
     public long count (Attendance attendance) {
         return attendanceRepository.count(Specification
                 .where(AttendanceSpecifications.userIdContains(attendance.getUserId()))
         );
     }
 
-    public Attendance save (Attendance attendance) {
-        return attendanceRepository.save(attendance);
+    public Object save (Attendance attendance) {
+        try {
+            return attendanceRepository.save(attendance);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "再度時間を置いてから実行してください";
+        }
     }
 
     public void deleteAll (List<Attendance> attendances) {

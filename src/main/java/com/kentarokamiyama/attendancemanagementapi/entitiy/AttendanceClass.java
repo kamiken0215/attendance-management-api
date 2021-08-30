@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -28,4 +29,5 @@ public class AttendanceClass {
 
     @Column(name = "company_id")
     private Integer companyId;
+
 }

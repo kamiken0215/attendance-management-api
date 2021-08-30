@@ -103,7 +103,7 @@ public class UserController {
 
         //  本人確認
         if (userRequest.getUserId() != null) {
-            if (!userRequest.getUserId().equals(loginUser.getUserId())) {
+            if (!userRequest.getUserId().equals(authUser.getUserId())) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return null;
             }
