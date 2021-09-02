@@ -1,6 +1,7 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceRepository;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
 import org.junit.jupiter.api.Test;
@@ -35,14 +36,14 @@ class AttendanceControllerTest {
         List<Attendance> attendances = new ArrayList<>();
         attendances.add(attendance);
 
-        Attendance find = Attendance.builder()
+        AttendanceView find = AttendanceView.builder()
                 .userId(1)
                 .attendanceDate("20200101")
                 .build();
 
         attendanceService.save(attendance);
 
-        List<Attendance> createdAttendances = attendanceService.find(find);
+        List<AttendanceView> createdAttendances = attendanceService.find(find);
         assertEquals(createdAttendances.get(0).getAttendanceDate(),"20200101");
         attendanceService.deleteAll(attendances);
     }

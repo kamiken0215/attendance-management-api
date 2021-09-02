@@ -55,7 +55,7 @@ public class CompanyController {
             return CompanyResponse.builder()
                     .companyId(result.getCompanyId())
                     .companyName(result.getCompanyName())
-                    .departments(result.getDepartment())
+                    //.departments(result.getDepartment())
                     .build();
         }
     }
@@ -110,7 +110,7 @@ public class CompanyController {
             return CompanyResponse.builder()
                     .companyId(c.getCompanyId())
                     .companyName(c.getCompanyName())
-                    .departments(c.getDepartment())
+                    //.departments(c.getDepartment())
                     .build();
         } else {
             return CompanyResponse.builder().error(result.toString()).build();

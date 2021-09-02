@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Data
@@ -18,7 +19,7 @@ public class CompanyResponse {
 
     private String companyName;
 
-    private List<Department> departments;
+    private Set<Department> departments;
 
     private String error;
 }

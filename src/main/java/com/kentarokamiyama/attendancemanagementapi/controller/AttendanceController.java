@@ -2,6 +2,7 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
@@ -50,27 +51,28 @@ public class AttendanceController {
             return null;
         }
 
-        List<Object> ret = attendanceService.fetchAll(companyId);
-
         //  単一ユーザーの場合
         if (attendanceDate != null) {
-            Attendance attendance = Attendance.builder()
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
                     .userId(userId)
                     .attendanceDate(attendanceDate)
                     .build();
 
             List<AttendanceResponse> attendanceResponses = new ArrayList<>();
-            List<Attendance> attendances = attendanceService.find(attendance);
-            for (Attendance a : attendances) {
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+            for (AttendanceView a : attendances) {
                 AttendanceResponse resp = AttendanceResponse.builder()
                         .userId(a.getUserId())
-                        .userName(a.getUser().getUserName())
+                        .userName(a.getUserName())
                         .attendanceDate(a.getAttendanceDate())
                         .startTime(a.getStartTime())
                         .endTime(a.getEndTime())
                         .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClassName())
                         .attendanceStatusCode(a.getAttendanceStatusCode())
-                        .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
+                        .attendanceStatusName(a.getAttendanceStatusName())
                         .build();
                 attendanceResponses.add(resp);
             }
@@ -88,20 +90,22 @@ public class AttendanceController {
 
         //  各ユーザーの出勤データを取得
         for (User u : users) {
-            Attendance attendance = Attendance.builder()
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(u.getCompanyId())
                     .userId(u.getUserId())
                     .build();
-            List<Attendance> attendances = attendanceService.find(attendance);
-            for (Attendance a : attendances) {
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+            for (AttendanceView a : attendances) {
                 AttendanceResponse resp = AttendanceResponse.builder()
                         .userId(a.getUserId())
-                        .userName(a.getUser().getUserName())
+                        .userName(a.getUserName())
                         .attendanceDate(a.getAttendanceDate())
                         .startTime(a.getStartTime())
                         .endTime(a.getEndTime())
                         .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClassName())
                         .attendanceStatusCode(a.getAttendanceStatusCode())
-                        .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
+                        .attendanceStatusName(a.getAttendanceStatusName())
                         .build();
                 attendanceResponses.add(resp);
             }
@@ -112,8 +116,8 @@ public class AttendanceController {
     }
 
     @GetMapping("admin/attendance")
-    public List<Attendance> find (@RequestBody AttendanceRequest attendanceRequest) {
-        Attendance attendance = Attendance.builder()
+    public List<AttendanceView> find (@RequestBody AttendanceRequest attendanceRequest) {
+        AttendanceView attendance = AttendanceView.builder()
                 .userId(attendanceRequest.getUserId())
                 .attendanceDate(attendanceRequest.getAttendanceDate())
                 .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
@@ -163,7 +167,6 @@ public class AttendanceController {
             Attendance a = (Attendance) request;
             return AttendanceResponse.builder()
                     .userId(a.getUserId())
-                    .userName(a.getUser().getUserName())
                     .attendanceDate(a.getAttendanceDate())
                     .startTime(a.getStartTime())
                     .endTime(a.getEndTime())
@@ -192,13 +195,11 @@ public class AttendanceController {
             Attendance a = (Attendance) result;
             return AttendanceResponse.builder()
                     .userId(a.getUserId())
-                    .userName(a.getUser().getUserName())
                     .attendanceDate(a.getAttendanceDate())
                     .startTime(a.getStartTime())
                     .endTime(a.getEndTime())
                     .attendanceClassCode(a.getAttendanceClassCode())
                     .attendanceStatusCode(a.getAttendanceStatusCode())
-                    .attendanceStatusName(a.getAttendanceStatus().getAttendanceStatusName())
                     .build();
         } else {
             return AttendanceResponse.builder().error(result.toString()).build();
@@ -231,12 +232,14 @@ public class AttendanceController {
         }
 
         if (attendanceDate != null) {
-            Attendance attendance = Attendance.builder()
+            AttendanceView attendance = AttendanceView.builder()
                     .userId(userId)
                     .attendanceDate(attendanceDate)
                     .build();
-            List<Attendance> attendances = attendanceService.find(attendance);
-            attendanceService.deleteAll(attendances);
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+
+            //  !!must create attendance list
+            //attendanceService.deleteAll(attendances);
             return attendanceDate +" 削除";
         }
 
@@ -249,12 +252,14 @@ public class AttendanceController {
         List<User> users = userService.find(user);
 
         for (User u : users) {
-            Attendance attendance = Attendance.builder()
+            AttendanceView attendance = AttendanceView.builder()
                     .userId(u.getUserId())
                     .build();
 
-            List<Attendance> attendances = attendanceService.find(attendance);
-            attendanceService.deleteAll(attendances);
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+
+            //  !!!must
+            //attendanceService.deleteAll(attendances);
         }
 
         return companyId + ":" + departmentCode + ":" + userId + "削除";
@@ -263,10 +268,10 @@ public class AttendanceController {
 
     @DeleteMapping("admin/attendance")
     public void deleteAttendance (@RequestBody AttendanceRequest attendanceRequest) {
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        List<Attendance> attendances = attendanceService.find(attendance);
-        attendanceService.deleteAll(attendances);
+//        Attendance attendance = new Attendance();
+//        attendance.setUserId(attendanceRequest.getUserId());
+//        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
+//        List<Attendance> attendances = attendanceService.find(attendance);
+//        attendanceService.deleteAll(attendances);
     }
 }

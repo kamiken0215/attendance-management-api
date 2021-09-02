@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -24,9 +25,14 @@ public class Company {
     @Column(name = "company_name")
     private String companyName;
 
+    @OneToMany(mappedBy = "company")
+    private Set<User> user;
+
 //    @ManyToOne
 //    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    @OneToMany(fetch = FetchType.EAGER, cascade= CascadeType.ALL)
-    @JoinColumn(name = "company_id",updatable = false)
-    private List<Department> department;
+    @OneToMany(mappedBy = "company")
+    private Set<Department> department;
+
+    @OneToMany(mappedBy = "company")
+    private Set<AttendanceClass> attendanceClass;
 }

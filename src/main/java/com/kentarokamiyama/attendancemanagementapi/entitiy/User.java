@@ -44,7 +44,10 @@ public class User {
     private Integer companyId;
 
     @ManyToOne
-    @JoinColumn(name = "department_code",referencedColumnName = "department_code", insertable = false, updatable = false)
+    @JoinColumns({
+            @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false),
+            @JoinColumn(name = "department_code",referencedColumnName = "department_code", insertable = false, updatable = false)
+    })
     private Department department;
 
     @Column(name = "department_code")

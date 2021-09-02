@@ -14,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(name = "attendance_class")
 @Data
+@IdClass(AttendanceClassPK.class)
 public class AttendanceClass {
 
     @Id
@@ -27,6 +28,7 @@ public class AttendanceClass {
     @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
     private Company company;
 
+    @Id
     @Column(name = "company_id")
     private Integer companyId;
 
