@@ -267,6 +267,11 @@ public class UserController {
 
         List<User> users = userService.find(user);
 
+        if (users.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "";
+        }
+
         int deletedCount = 0;
         for (User u : users) {
             String result = userService.delete(u);

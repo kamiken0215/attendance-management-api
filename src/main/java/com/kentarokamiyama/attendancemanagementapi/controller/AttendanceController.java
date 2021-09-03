@@ -244,6 +244,11 @@ public class AttendanceController {
 
             List<AttendanceView> attendances = attendanceService.find(attendance);
 
+            if (attendances.size() == 0) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return "";
+            }
+
             int deletedCount = 0;
 
             for (AttendanceView attendanceView : attendances) {
@@ -273,6 +278,10 @@ public class AttendanceController {
                 .build();
 
         List<User> users = userService.find(user);
+        if (users.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "";
+        }
 
         int deletedCount = 0;
         for (User u : users) {
