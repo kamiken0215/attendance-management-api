@@ -7,10 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -19,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "view_attendance")
 @Data
+@IdClass(AttendancePK.class)
 public class AttendanceView {
 
     @Column(name = "company_id")
@@ -27,6 +25,7 @@ public class AttendanceView {
     @Column(name = "department_code")
     private String departmentCode;
 
+    @Id
     @Column(name = "user_id")
     private Integer userId;
 

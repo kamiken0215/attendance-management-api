@@ -25,14 +25,4 @@ public class Company {
     @Column(name = "company_name")
     private String companyName;
 
-    @OneToMany(mappedBy = "company")
-    private Set<User> user;
-
-//    @ManyToOne
-//    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    @OneToMany(mappedBy = "company")
-    private Set<Department> department;
-
-    @OneToMany(mappedBy = "company")
-    private Set<AttendanceClass> attendanceClass;
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -60,7 +61,7 @@ public class AttendanceController {
                     .attendanceDate(attendanceDate)
                     .build();
 
-            List<AttendanceResponse> attendanceResponses = new ArrayList<>();
+            LinkedList<AttendanceResponse> attendanceResponses = new LinkedList<>();
             List<AttendanceView> attendances = attendanceService.find(attendance);
             for (AttendanceView a : attendances) {
                 AttendanceResponse resp = AttendanceResponse.builder()
@@ -85,13 +86,14 @@ public class AttendanceController {
                 .userId(userId)
                 .build();
 
-        List<AttendanceResponse> attendanceResponses = new ArrayList<>();
+        LinkedList<AttendanceResponse> attendanceResponses = new LinkedList<>();
         List<User> users = userService.find(filterUser);
 
         //  各ユーザーの出勤データを取得
         for (User u : users) {
             AttendanceView attendance = AttendanceView.builder()
                     .companyId(u.getCompanyId())
+                    .departmentCode(u.getDepartmentCode())
                     .userId(u.getUserId())
                     .build();
             List<AttendanceView> attendances = attendanceService.find(attendance);

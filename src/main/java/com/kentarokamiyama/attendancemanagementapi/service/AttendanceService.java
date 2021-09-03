@@ -9,6 +9,7 @@ import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceViewRepo
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +29,20 @@ public class AttendanceService {
 
     public List<AttendanceView> find(AttendanceView attendanceView) {
         log.severe("---実行SQL------------------------------------------------");
-        return attendanceViewRepository.findAll(Specification
-                .where(AttendanceViewSpecifications.companyIdContains(attendanceView.getCompanyId()))
-                .and(AttendanceViewSpecifications.departmentCodeContains(attendanceView.getDepartmentCode()))
-                .and(AttendanceViewSpecifications.attendanceClassCodeContains(attendanceView.getAttendanceClassCode()))
-                .and(AttendanceViewSpecifications.attendanceStatusCodeContains(attendanceView.getAttendanceStatusCode()))
-                .and(AttendanceViewSpecifications.userIdContains(attendanceView.getUserId()))
-                .and(AttendanceViewSpecifications.attendanceDateContains(attendanceView.getAttendanceDate()))
-        );
+        try {
+            return attendanceViewRepository.findAll(Specification
+                    .where(AttendanceViewSpecifications.companyIdContains(attendanceView.getCompanyId()))
+                    .and(AttendanceViewSpecifications.departmentCodeContains(attendanceView.getDepartmentCode()))
+                    .and(AttendanceViewSpecifications.attendanceClassCodeContains(attendanceView.getAttendanceClassCode()))
+                    .and(AttendanceViewSpecifications.attendanceStatusCodeContains(attendanceView.getAttendanceStatusCode()))
+                    .and(AttendanceViewSpecifications.userIdContains(attendanceView.getUserId()))
+                    .and(AttendanceViewSpecifications.attendanceDateContains(attendanceView.getAttendanceDate()))
+                    ,Sort.by(Sort.Direction.ASC,"userId").and(Sort.by(Sort.Direction.ASC,"attendanceDate"))
+            );
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return new ArrayList<>();
+        }
     }
 
     public List<AttendanceView> findAll() {
