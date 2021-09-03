@@ -78,8 +78,24 @@ public class AttendanceService {
         }
     }
 
-    public void deleteAll (List<Attendance> attendances) {
-        attendanceRepository.deleteAll(attendances);
+    public String delete(Attendance attendance) {
+        try {
+            attendanceRepository.delete(attendance);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "削除失敗";
+        }
+    }
+
+    public String deleteAll (List<Attendance> attendances) {
+        try {
+            attendanceRepository.deleteAll(attendances);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "削除失敗";
+        }
     }
 
     public boolean isNotExistUser(Integer userId, String loginUser) {

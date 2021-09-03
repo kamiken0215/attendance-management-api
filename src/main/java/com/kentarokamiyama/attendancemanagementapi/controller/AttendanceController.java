@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Log
@@ -235,14 +236,34 @@ public class AttendanceController {
 
         if (attendanceDate != null) {
             AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
                     .userId(userId)
                     .attendanceDate(attendanceDate)
                     .build();
+
             List<AttendanceView> attendances = attendanceService.find(attendance);
 
-            //  !!must create attendance list
-            //attendanceService.deleteAll(attendances);
-            return attendanceDate +" 削除";
+            int deletedCount = 0;
+
+            for (AttendanceView attendanceView : attendances) {
+                Attendance a = Attendance.builder()
+                        .userId(attendanceView.getUserId())
+                        .attendanceDate(attendanceView.getAttendanceDate())
+                        .startTime(attendanceView.getStartTime())
+                        .endTime(attendanceView.getEndTime())
+                        .attendanceClassCode(attendanceView.getAttendanceClassCode())
+                        .attendanceStatusCode(attendanceView.getAttendanceStatusCode())
+                        .build();
+                String deleteRet = attendanceService.delete(a);
+                deletedCount ++;
+                if (deleteRet.length() > 0) {
+                    response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return deletedCount + "件目エラー";
+                }
+            }
+
+            return deletedCount +"件削除";
         }
 
         User user = User.builder()
@@ -253,18 +274,35 @@ public class AttendanceController {
 
         List<User> users = userService.find(user);
 
+        int deletedCount = 0;
         for (User u : users) {
             AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
                     .userId(u.getUserId())
                     .build();
 
             List<AttendanceView> attendances = attendanceService.find(attendance);
 
-            //  !!!must
-            //attendanceService.deleteAll(attendances);
+            for (AttendanceView attendanceView : attendances) {
+                Attendance a = Attendance.builder()
+                        .userId(attendanceView.getUserId())
+                        .attendanceDate(attendanceView.getAttendanceDate())
+                        .startTime(attendanceView.getStartTime())
+                        .endTime(attendanceView.getEndTime())
+                        .attendanceClassCode(attendanceView.getAttendanceClassCode())
+                        .attendanceStatusCode(attendanceView.getAttendanceStatusCode())
+                        .build();
+                String deleteRet = attendanceService.delete(a);
+                deletedCount ++;
+                if (deleteRet.length() > 0) {
+                    response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return deletedCount + "件目エラー";
+                }
+            }
         }
 
-        return companyId + ":" + departmentCode + ":" + userId + "削除";
+        return deletedCount +"件削除";
 
     }
 
