@@ -56,13 +56,14 @@ public class UserService {
         }
     }
 
-    public void delete (User user) {
-        List<User> result = userRepository.findAll(Specification
-                .where(UserSpecifications.companyIdContains(user.getCompanyId()))
-                .and(UserSpecifications.departmentCodeContains(user.getDepartmentCode()))
-                .and(UserSpecifications.userIdContains(user.getUserId()))
-        );
-        userRepository.deleteAll(result);
+    public String delete (User user) {
+        try {
+            userRepository.delete(user);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "削除失敗";
+        }
     }
 
     public boolean isNotExistUser(Integer userId, String loginUser) {

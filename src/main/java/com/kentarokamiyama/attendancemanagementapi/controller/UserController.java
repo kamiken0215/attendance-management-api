@@ -238,7 +238,7 @@ public class UserController {
     @DeleteMapping({"companies/{companyId}/users",
             "companies/{companyId}/departments/{departmentCode}/users",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}"})
-    public void deleteUser (HttpServletRequest request,HttpServletResponse response,
+    public String deleteUser (HttpServletRequest request,HttpServletResponse response,
                             @PathVariable(value = "companyId") Integer companyId,
                             @PathVariable(value = "departmentCode",required = false) String departmentCode,
                             @PathVariable(value = "userId",required = false) Integer userId) {
@@ -256,17 +256,27 @@ public class UserController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            return "不正";
         }
 
-        //  uriに含まれる情報だけ
         User user = User.builder()
                 .companyId(companyId)
                 .departmentCode(departmentCode)
                 .userId(userId)
                 .build();
 
-        userService.delete(user);
+        List<User> users = userService.find(user);
+
+        int deletedCount = 0;
+        for (User u : users) {
+            String result = userService.delete(u);
+            deletedCount ++;
+            if (result.length() > 0) {
+                return deletedCount + "件目エラー";
+            }
+        }
+
+        return deletedCount +"件削除";
     }
 
     @DeleteMapping("/admin/users")
@@ -275,7 +285,7 @@ public class UserController {
         user.setCompanyId(userRequest.getCompanyId());
         user.setDepartmentCode(userRequest.getDepartmentCode());
         user.setUserId(userRequest.getUserId());
-        userService.delete(user);
+        String result = userService.delete(user);
     }
 
 }
