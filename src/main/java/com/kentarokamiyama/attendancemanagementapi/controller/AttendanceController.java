@@ -166,7 +166,7 @@ public class AttendanceController {
         Object result = attendanceService.save(attendance);
 
         if (result instanceof Attendance) {
-            Attendance a = (Attendance) request;
+            Attendance a = (Attendance) result;
             return AttendanceResponse.builder()
                     .userId(a.getUserId())
                     .attendanceDate(a.getAttendanceDate())
