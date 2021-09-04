@@ -5,15 +5,18 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceClassRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log
 public class AttendanceClassService {
 
     @Autowired
@@ -36,7 +39,12 @@ public class AttendanceClassService {
     }
 
     public List<AttendanceClass> save (List<AttendanceClass> attendanceClassList) {
-        return attendanceClassRepository.saveAll(attendanceClassList);
+        try {
+            return attendanceClassRepository.saveAll(attendanceClassList);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return new ArrayList<>();
+        }
     }
 
     public void delete (List<AttendanceClass> attendanceClass) {

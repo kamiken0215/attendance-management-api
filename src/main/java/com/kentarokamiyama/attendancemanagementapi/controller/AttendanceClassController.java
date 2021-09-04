@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,13 +60,23 @@ public class AttendanceClassController {
         return null;
     }
 
-    @PostMapping("/company/attendance-class")
+    @PostMapping("/classes")
     public List<AttendanceClass> save (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
+
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (!attendanceClassService.isCompanyUser(loginUser,attendanceClassRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(attendanceClassRequest.getCompanyId())
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return new ArrayList<>();
         }
         List<AttendanceClass> attendanceClasses = attendanceClassRequest.getAttendanceClasses()
                 .stream()
@@ -76,7 +87,7 @@ public class AttendanceClassController {
 
         if (attendanceClasses.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return new ArrayList<>();
         }
 
         return attendanceClassService.save(attendanceClasses);

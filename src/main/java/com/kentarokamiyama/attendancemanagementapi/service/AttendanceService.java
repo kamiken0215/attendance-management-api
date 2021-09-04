@@ -74,7 +74,7 @@ public class AttendanceService {
             return attendanceRepository.save(attendance);
         } catch (Throwable t) {
             log.severe(t.toString());
-            return "再度時間を置いてから実行してください";
+            return "error";
         }
     }
 
@@ -84,7 +84,7 @@ public class AttendanceService {
             return "";
         } catch (Throwable t) {
             log.severe(t.toString());
-            return "削除失敗";
+            return "error";
         }
     }
 
