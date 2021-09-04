@@ -111,19 +111,44 @@ public class AttendanceClassController {
         return attendanceClassService.save(attendanceClasses);
     }
 
-    @DeleteMapping("/company/attendance-class")
-    public String delete (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
+    @DeleteMapping({"/companies/{companyId}/classes","/companies/{companyId}/classes/{attendanceClassCode}"})
+    public String delete (HttpServletRequest request,HttpServletResponse response,
+                          @PathVariable(value = "companyId") Integer companyId,
+                          @PathVariable(value = "attendanceClassCode",required = false) String attendanceClassCode) {
+
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (!attendanceClassService.isCompanyUser(loginUser,attendanceClassRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
 
-        //List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClassRequest);
+        AttendanceClass attendanceClass = AttendanceClass.builder()
+                .companyId(companyId)
+                .attendanceClassCode(attendanceClassCode)
+                .build();
+        List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClass);
 
-        //attendanceClassService.delete(attendanceClasses);
-        return "";
+        int deletedCount = 0;
+        for (AttendanceClass a : attendanceClasses) {
+            AttendanceClass ac = AttendanceClass.builder().companyId(a.getCompanyId()).attendanceClassCode(a.getAttendanceClassCode()).build();
+            String deleteRet = attendanceClassService.delete(ac);
+            deletedCount ++;
+            if (deleteRet.length() > 0) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return deletedCount + "件目エラー";
+            }
+        }
+        return deletedCount +"件削除";
     }
 
     @DeleteMapping("/admin/company/attendance-class")

@@ -24,7 +24,11 @@ public class AttendanceClassService {
     @Autowired
     private UserRepository userRepository;
 
+    private final String EXECUTE_SQL = "---実行SQL------------------------------------------------";
+
     public List<AttendanceClass> find (AttendanceClass attendanceClass) {
+
+        log.severe(EXECUTE_SQL);
         return attendanceClassRepository.findAll(Specification
                 .where(AttendanceClassSpecifications.companyIdContains(attendanceClass.getCompanyId()))
                 .and(AttendanceClassSpecifications.attendanceClassCodeContains(attendanceClass.getAttendanceClassCode()))
@@ -33,6 +37,8 @@ public class AttendanceClassService {
     }
 
     public long count (AttendanceClass attendanceClass) {
+
+        log.severe(EXECUTE_SQL);
         return attendanceClassRepository.count(Specification
                 .where(AttendanceClassSpecifications.companyIdContains(attendanceClass.getCompanyId()))
         );
@@ -40,6 +46,7 @@ public class AttendanceClassService {
 
     public List<AttendanceClass> save (List<AttendanceClass> attendanceClassList) {
         try {
+            log.severe(EXECUTE_SQL);
             return attendanceClassRepository.saveAll(attendanceClassList);
         } catch (Throwable t) {
             log.severe(t.toString());
@@ -47,19 +54,18 @@ public class AttendanceClassService {
         }
     }
 
-    public void delete (List<AttendanceClass> attendanceClass) {
-        attendanceClassRepository.deleteAll(attendanceClass);
+    public String delete (AttendanceClass attendanceClass) {
+        try {
+            log.severe(EXECUTE_SQL);
+            attendanceClassRepository.delete(attendanceClass);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "error";
+        }
     }
 
-    public boolean isCompanyUser(String loginUser,Integer companyId) {
-        Optional<User> userOpt = userRepository.findOne(Specification
-                .where(UserSpecifications.emailContains(loginUser))
-        );
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            return user.getCompanyId().equals(companyId);
-        } else {
-            return false;
-        }
+    public void deleteAll (List<AttendanceClass> attendanceClass) {
+        attendanceClassRepository.deleteAll(attendanceClass);
     }
  }

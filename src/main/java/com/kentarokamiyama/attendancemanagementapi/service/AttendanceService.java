@@ -27,8 +27,10 @@ public class AttendanceService {
     @Autowired
     private AttendanceViewRepository attendanceViewRepository;
 
+    private final String EXECUTE_SQL = "---実行SQL------------------------------------------------";
+
     public List<AttendanceView> find(AttendanceView attendanceView) {
-        log.severe("---実行SQL------------------------------------------------");
+        log.severe(EXECUTE_SQL);
         try {
             return attendanceViewRepository.findAll(Specification
                     .where(AttendanceViewSpecifications.companyIdContains(attendanceView.getCompanyId()))
@@ -47,6 +49,7 @@ public class AttendanceService {
 
     public List<AttendanceView> findAll() {
         try {
+            log.severe(EXECUTE_SQL);
             return attendanceViewRepository.findAll();
         } catch (Throwable t) {
             log.severe("-------------------------------------");
