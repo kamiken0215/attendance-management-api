@@ -6,6 +6,7 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceClassRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,11 @@ public class AttendanceClassService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<AttendanceClass> find (AttendanceClassRequest attendanceClassRequest) {
+    public List<AttendanceClass> find (AttendanceClass attendanceClass) {
         return attendanceClassRepository.findAll(Specification
-                .where(AttendanceClassSpecifications.companyIdContains(attendanceClassRequest.getCompanyId()))
+                .where(AttendanceClassSpecifications.companyIdContains(attendanceClass.getCompanyId()))
+                .and(AttendanceClassSpecifications.attendanceClassCodeContains(attendanceClass.getAttendanceClassCode()))
+                ,Sort.by(Sort.Direction.ASC,"companyId").and(Sort.by(Sort.Direction.ASC,"attendanceClassCode"))
         );
     }
 

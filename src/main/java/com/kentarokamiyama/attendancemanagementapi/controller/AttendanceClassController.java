@@ -3,8 +3,10 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceClassRepository;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceClassService;
+import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,23 +21,42 @@ public class AttendanceClassController {
     @Autowired
     private JwtProvider jwtProvider;
     @Autowired
+    private UserService userService;
+    @Autowired
     private AttendanceClassService attendanceClassService;
 
-    @GetMapping("/company/attendance-class")
-    public List<AttendanceClass> find (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
+    @GetMapping({"/companies/{companyId}/classes","/companies/{companyId}/classes/{attendanceClassCode}"})
+    public List<AttendanceClass> find (HttpServletRequest request,HttpServletResponse response,
+                                       @PathVariable(value = "companyId") Integer companyId,
+                                       @PathVariable(value = "attendanceClassCode",required = false) String attendanceClassCode) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (!attendanceClassService.isCompanyUser(loginUser,attendanceClassRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
 
-        return attendanceClassService.find(attendanceClassRequest);
+        AttendanceClass attendanceClass = AttendanceClass.builder()
+                .companyId(companyId)
+                .attendanceClassCode(attendanceClassCode)
+                .build();
+
+        return attendanceClassService.find(attendanceClass);
     }
 
     @GetMapping("/admin/company/attendance-class")
     public List<AttendanceClass> find (@RequestBody AttendanceClassRequest attendanceClassRequest) {
-        return attendanceClassService.find(attendanceClassRequest);
+        //return attendanceClassService.find(attendanceClassRequest);
+        return null;
     }
 
     @PostMapping("/company/attendance-class")
@@ -88,17 +109,17 @@ public class AttendanceClassController {
             return null;
         }
 
-        List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClassRequest);
+        //List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClassRequest);
 
-        attendanceClassService.delete(attendanceClasses);
+        //attendanceClassService.delete(attendanceClasses);
         return "";
     }
 
     @DeleteMapping("/admin/company/attendance-class")
     public String delete (HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
 
-        List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClassRequest);
-        attendanceClassService.delete(attendanceClasses);
+        //List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClassRequest);
+        //attendanceClassService.delete(attendanceClasses);
         return "";
     }
 

@@ -18,18 +18,15 @@ import java.util.Set;
 public class AttendanceClass {
 
     @Id
+    @Column(name = "company_id")
+    private Integer companyId;
+
+    @Id
     @Column(name = "attendance_class_code")
     private String attendanceClassCode;
 
     @Column(name = "attendance_class_name")
     private String attendanceClassName;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    private Company company;
-
-    @Id
-    @Column(name = "company_id")
-    private Integer companyId;
 
 }
