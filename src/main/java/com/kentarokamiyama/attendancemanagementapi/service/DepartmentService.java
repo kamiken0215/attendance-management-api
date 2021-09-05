@@ -5,7 +5,9 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.DepartmentRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log
 public class DepartmentService {
 
     @Autowired
@@ -20,9 +23,11 @@ public class DepartmentService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Department> find (DepartmentRequest departmentRequest) {
+    public List<Department> find (Department department) {
         return departmentRepository.findAll(Specification
-                .where(DepartmentSpecifications.companyIdContains(departmentRequest.getCompanyId()))
+                .where(DepartmentSpecifications.companyIdContains(department.getCompanyId()))
+                .and(DepartmentSpecifications.departmentCodeContains(department.getDepartmentCode()))
+                ,Sort.by(Sort.Direction.ASC,"companyId").and(Sort.by(Sort.Direction.ASC,"departmentCode"))
         );
     }
 
@@ -36,8 +41,14 @@ public class DepartmentService {
         return departmentRepository.saveAll(departments);
     }
 
-    public void delete (List<Department> departments) {
-        departmentRepository.deleteAll(departments);
+    public String delete (List<Department> departments) {
+        try {
+            departmentRepository.deleteAll(departments);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "失敗";
+        }
     }
 
     public boolean isNotCompanyUser(String loginUser, Integer companyId) {

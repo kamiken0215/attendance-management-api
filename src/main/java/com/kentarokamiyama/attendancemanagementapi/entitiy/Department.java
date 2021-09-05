@@ -17,17 +17,14 @@ import javax.persistence.*;
 public class Department {
 
     @Id
+    @Column(name = "company_id")
+    private Integer companyId;
+
+    @Id
     @Column(name = "department_code")
     private String departmentCode;
 
     @Column(name = "department_name")
     private String departmentName;
 
-    @Id
-    @Column(name = "company_id")
-    private Integer companyId;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    private Company company;
 }

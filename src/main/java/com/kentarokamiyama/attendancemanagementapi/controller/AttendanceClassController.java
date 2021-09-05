@@ -140,8 +140,7 @@ public class AttendanceClassController {
 
         int deletedCount = 0;
         for (AttendanceClass a : attendanceClasses) {
-            AttendanceClass ac = AttendanceClass.builder().companyId(a.getCompanyId()).attendanceClassCode(a.getAttendanceClassCode()).build();
-            String deleteRet = attendanceClassService.delete(ac);
+            String deleteRet = attendanceClassService.delete(a);
             deletedCount ++;
             if (deleteRet.length() > 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);

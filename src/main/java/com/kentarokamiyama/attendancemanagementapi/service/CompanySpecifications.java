@@ -19,7 +19,7 @@ public class CompanySpecifications {
     }
 
     public static Specification<Company> companyNameContains(String companyName) {
-        return StringUtils.hasText(companyName) ? null : (root, query, cb) ->
+        return !StringUtils.hasText(companyName) ? null : (root, query, cb) ->
                 cb.equal(root.get("companyName"),companyName);
     }
 
