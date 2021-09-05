@@ -58,13 +58,22 @@ public class DepartmentController {
         return null;
     }
 
-    @PostMapping("/company/department")
+    @PostMapping("/departments")
     public List<Department> save (HttpServletRequest request, HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (departmentService.isNotCompanyUser(loginUser, departmentRequest.getCompanyId())) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(departmentRequest.getCompanyId())
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return new ArrayList<>();
         }
         List<Department> departments = departmentRequest.getDepartments()
                 .stream()
@@ -75,7 +84,7 @@ public class DepartmentController {
 
         if (departments.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return new ArrayList<>();
         }
 
         return departmentService.save(departments);
