@@ -41,9 +41,9 @@ public class DepartmentService {
         return departmentRepository.saveAll(departments);
     }
 
-    public String delete (List<Department> departments) {
+    public String delete (Department department) {
         try {
-            departmentRepository.deleteAll(departments);
+            departmentRepository.delete(department);
             return "";
         } catch (Throwable t) {
             log.severe(t.toString());

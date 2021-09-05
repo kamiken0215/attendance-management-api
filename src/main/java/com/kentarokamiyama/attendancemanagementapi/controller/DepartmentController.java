@@ -136,7 +136,7 @@ public class DepartmentController {
 
         int deletedCount = 0;
         for (Department d : departments) {
-            String deleteRet = departmentService.delete(departments);
+            String deleteRet = departmentService.delete(d);
             deletedCount ++;
             if (deleteRet.length() > 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
