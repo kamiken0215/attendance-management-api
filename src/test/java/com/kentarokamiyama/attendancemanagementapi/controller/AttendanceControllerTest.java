@@ -1,6 +1,7 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceRepository;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,16 +33,19 @@ class AttendanceControllerTest {
                 .endTime(new Date())
                 .build();
 
-        AttendanceRequest attendanceRequest = AttendanceRequest.builder()
+        List<Attendance> attendances = new ArrayList<>();
+        attendances.add(attendance);
+
+        AttendanceView find = AttendanceView.builder()
                 .userId(1)
                 .attendanceDate("20200101")
                 .build();
 
-        Attendance createdAttendance = attendanceService.save(attendance);
+        attendanceService.save(attendance);
 
-        List<Attendance> createdAttendances = attendanceService.find(attendanceRequest);
+        List<AttendanceView> createdAttendances = attendanceService.find(find);
         assertEquals(createdAttendances.get(0).getAttendanceDate(),"20200101");
-        attendanceService.delete(attendance);
+        attendanceService.deleteAll(attendances);
     }
 
     @Test

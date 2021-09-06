@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.entitiy;
+package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -7,41 +7,29 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
 import java.util.Date;
-import java.util.Set;
 
-@Entity
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "attendance")
-@Data
-@IdClass(AttendancePK.class)
-public class Attendance {
+public class AttendanceResponse {
 
-    @Id
-    @Column(name = "user_id")
     private Integer userId;
+    private String userName;
 
-    @Id
-    @Column(name = "attendance_date")
     private String attendanceDate;
 
-    @Column(name = "start_time", columnDefinition="DATETIME")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
 
-    @Column(name = "end_time", columnDefinition="DATETIME")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
-
-    @Column(name = "attendance_class_code")
     private String attendanceClassCode;
-
-    @Column(name = "attendance_status_code")
+    private String attendanceClassName;
     private String attendanceStatusCode;
-
+    private String attendanceStatusName;
+    private String error;
 }

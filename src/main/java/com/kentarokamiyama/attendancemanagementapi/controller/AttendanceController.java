@@ -2,56 +2,188 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
+import com.kentarokamiyama.attendancemanagementapi.service.UserService;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
+@Log
 public class AttendanceController {
 
     @Autowired
     private JwtProvider jwtProvider;
     @Autowired
+    private UserService userService;
+    @Autowired
     private AttendanceService attendanceService;
 
-    @GetMapping("/attendance")
-    public List<Attendance> find (HttpServletRequest request,@RequestBody AttendanceRequest attendanceRequest) {
+    @GetMapping({"companies/{companyId}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
+    public List<AttendanceResponse> find (HttpServletRequest request,HttpServletResponse response,
+                                  @PathVariable(value = "companyId") Integer companyId,
+                                  @PathVariable(value = "departmentCode",required = false) String departmentCode,
+                                  @PathVariable(value = "userId",required = false) Integer userId,
+                                  @PathVariable(value = "attendanceDate",required = false) String attendanceDate) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (attendanceService.isNotExistUser(attendanceRequest.getUserId(), loginUser)) {
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
-        return attendanceService.find(attendanceRequest);
+
+        //  単一ユーザーの場合
+        if (attendanceDate != null) {
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
+                    .userId(userId)
+                    .attendanceDate(attendanceDate)
+                    .build();
+
+            LinkedList<AttendanceResponse> attendanceResponses = new LinkedList<>();
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+            for (AttendanceView a : attendances) {
+                AttendanceResponse resp = AttendanceResponse.builder()
+                        .userId(a.getUserId())
+                        .userName(a.getUserName())
+                        .attendanceDate(a.getAttendanceDate())
+                        .startTime(a.getStartTime())
+                        .endTime(a.getEndTime())
+                        .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClassName())
+                        .attendanceStatusCode(a.getAttendanceStatusCode())
+                        .attendanceStatusName(a.getAttendanceStatusName())
+                        .build();
+                attendanceResponses.add(resp);
+            }
+            return attendanceResponses;
+        }
+
+        User filterUser =  User.builder()
+                .companyId(companyId)
+                .departmentCode(departmentCode)
+                .userId(userId)
+                .build();
+
+        LinkedList<AttendanceResponse> attendanceResponses = new LinkedList<>();
+        List<User> users = userService.find(filterUser);
+
+        //  各ユーザーの出勤データを取得
+        for (User u : users) {
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(u.getCompanyId())
+                    .departmentCode(u.getDepartmentCode())
+                    .userId(u.getUserId())
+                    .build();
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+            for (AttendanceView a : attendances) {
+                AttendanceResponse resp = AttendanceResponse.builder()
+                        .userId(a.getUserId())
+                        .userName(a.getUserName())
+                        .attendanceDate(a.getAttendanceDate())
+                        .startTime(a.getStartTime())
+                        .endTime(a.getEndTime())
+                        .attendanceClassCode(a.getAttendanceClassCode())
+                        .attendanceClassName(a.getAttendanceClassName())
+                        .attendanceStatusCode(a.getAttendanceStatusCode())
+                        .attendanceStatusName(a.getAttendanceStatusName())
+                        .build();
+                attendanceResponses.add(resp);
+            }
+            attendances.clear();
+        }
+
+        return attendanceResponses;
     }
 
     @GetMapping("admin/attendance")
-    public List<Attendance> find (@RequestBody AttendanceRequest attendanceRequest) {
-        return attendanceService.find(attendanceRequest);
+    public List<AttendanceView> find (@RequestBody AttendanceRequest attendanceRequest) {
+        AttendanceView attendance = AttendanceView.builder()
+                .userId(attendanceRequest.getUserId())
+                .attendanceDate(attendanceRequest.getAttendanceDate())
+                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
+                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
+                .build();
+        return attendanceService.find(attendance);
     }
 
-    @PostMapping("/attendance")
-    public Attendance saveAttendance (HttpServletRequest request,@RequestBody AttendanceRequest attendanceRequest) {
+    @PostMapping("/attendances")
+    public AttendanceResponse saveAttendance (HttpServletRequest request,HttpServletResponse response,@RequestBody AttendanceRequest attendanceRequest) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (attendanceService.isNotExistUser(attendanceRequest.getUserId(), loginUser)) {
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(attendanceRequest.getCompanyId())
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        attendance.setStartTime(attendanceRequest.getStartTime());
-        attendance.setEndTime(attendanceRequest.getEndTime());
-        attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
-        attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-        return attendanceService.save(attendance);
+
+        //  本人確認
+        if (attendanceRequest.getUserId() != null) {
+            if (!attendanceRequest.getUserId().equals(authUser.getUserId())) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return null;
+            }
+        }
+
+        Attendance attendance = Attendance.builder()
+                .userId(attendanceRequest.getUserId())
+                .attendanceDate(attendanceRequest.getAttendanceDate())
+                .startTime(attendanceRequest.getStartTime())
+                .endTime(attendanceRequest.getEndTime())
+                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
+                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
+                .build();
+
+        Object result = attendanceService.save(attendance);
+
+        if (result instanceof Attendance) {
+            Attendance a = (Attendance) result;
+            return AttendanceResponse.builder()
+                    .userId(a.getUserId())
+                    .attendanceDate(a.getAttendanceDate())
+                    .startTime(a.getStartTime())
+                    .endTime(a.getEndTime())
+                    .attendanceClassCode(a.getAttendanceClassCode())
+                    .attendanceStatusCode(a.getAttendanceStatusCode())
+                    .build();
+        } else {
+            return AttendanceResponse.builder().error(result.toString()).build();
+        }
+
     }
 
     @PostMapping("admin/attendance")
-    public Attendance saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
+    public AttendanceResponse saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
         Attendance attendance = new Attendance();
         attendance.setUserId(attendanceRequest.getUserId());
         attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
@@ -59,27 +191,136 @@ public class AttendanceController {
         attendance.setEndTime(attendanceRequest.getEndTime());
         attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
         attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-        return attendanceService.save(attendance);
+
+        Object result = attendanceService.save(attendance);
+
+        if (result instanceof Attendance) {
+            Attendance a = (Attendance) result;
+            return AttendanceResponse.builder()
+                    .userId(a.getUserId())
+                    .attendanceDate(a.getAttendanceDate())
+                    .startTime(a.getStartTime())
+                    .endTime(a.getEndTime())
+                    .attendanceClassCode(a.getAttendanceClassCode())
+                    .attendanceStatusCode(a.getAttendanceStatusCode())
+                    .build();
+        } else {
+            return AttendanceResponse.builder().error(result.toString()).build();
+        }
     }
 
-    @DeleteMapping("/attendance")
-    public void deleteAttendance (HttpServletRequest request,HttpServletResponse response, @RequestBody AttendanceRequest attendanceRequest) {
+    @DeleteMapping({"companies/{companyId}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
+            "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
+    public String deleteAttendance (HttpServletRequest request,HttpServletResponse response,
+                                  @PathVariable(value = "companyId") Integer companyId,
+                                  @PathVariable(value = "departmentCode",required = false) String departmentCode,
+                                  @PathVariable(value = "userId",required = false) Integer userId,
+                                  @PathVariable(value = "attendanceDate",required = false) String attendanceDate) {
         String token = request.getHeader("Authorization").substring(7);
-        String loginUser = jwtProvider.getLoginFromToken(token);
-        if (attendanceService.isNotExistUser(attendanceRequest.getUserId(), loginUser)) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        String email = jwtProvider.getLoginFromToken(token);
+
+        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+        User loginUser = User.builder()
+                .companyId(companyId)
+                .email(email)
+                .build();
+
+        User authUser = userService.findOne(loginUser);
+
+        if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return "不正";
         }
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        attendanceService.delete(attendance);
+
+        if (attendanceDate != null) {
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
+                    .userId(userId)
+                    .attendanceDate(attendanceDate)
+                    .build();
+
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+
+            if (attendances.size() == 0) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return "";
+            }
+
+            int deletedCount = 0;
+
+            for (AttendanceView attendanceView : attendances) {
+                Attendance a = Attendance.builder()
+                        .userId(attendanceView.getUserId())
+                        .attendanceDate(attendanceView.getAttendanceDate())
+                        .startTime(attendanceView.getStartTime())
+                        .endTime(attendanceView.getEndTime())
+                        .attendanceClassCode(attendanceView.getAttendanceClassCode())
+                        .attendanceStatusCode(attendanceView.getAttendanceStatusCode())
+                        .build();
+                String deleteRet = attendanceService.delete(a);
+                deletedCount ++;
+                if (deleteRet.length() > 0) {
+                    response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return deletedCount + "件目エラー";
+                }
+            }
+
+            return deletedCount +"件削除";
+        }
+
+        User user = User.builder()
+                .companyId(companyId)
+                .departmentCode(departmentCode)
+                .userId(userId)
+                .build();
+
+        List<User> users = userService.find(user);
+        if (users.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "";
+        }
+
+        int deletedCount = 0;
+        for (User u : users) {
+            AttendanceView attendance = AttendanceView.builder()
+                    .companyId(companyId)
+                    .departmentCode(departmentCode)
+                    .userId(u.getUserId())
+                    .build();
+
+            List<AttendanceView> attendances = attendanceService.find(attendance);
+
+            for (AttendanceView attendanceView : attendances) {
+                Attendance a = Attendance.builder()
+                        .userId(attendanceView.getUserId())
+                        .attendanceDate(attendanceView.getAttendanceDate())
+                        .startTime(attendanceView.getStartTime())
+                        .endTime(attendanceView.getEndTime())
+                        .attendanceClassCode(attendanceView.getAttendanceClassCode())
+                        .attendanceStatusCode(attendanceView.getAttendanceStatusCode())
+                        .build();
+                String deleteRet = attendanceService.delete(a);
+                deletedCount ++;
+                if (deleteRet.length() > 0) {
+                    response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return deletedCount + "件目エラー";
+                }
+            }
+        }
+
+        return deletedCount +"件削除";
+
     }
 
     @DeleteMapping("admin/attendance")
     public void deleteAttendance (@RequestBody AttendanceRequest attendanceRequest) {
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        attendanceService.delete(attendance);
+//        Attendance attendance = new Attendance();
+//        attendance.setUserId(attendanceRequest.getUserId());
+//        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
+//        List<Attendance> attendances = attendanceService.find(attendance);
+//        attendanceService.deleteAll(attendances);
     }
 }

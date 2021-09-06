@@ -9,20 +9,28 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "attendance")
+@Table(name = "view_attendance")
 @Data
 @IdClass(AttendancePK.class)
-public class Attendance {
+public class AttendanceView {
+
+    @Column(name = "company_id")
+    private Integer companyId;
+
+    @Column(name = "department_code")
+    private String departmentCode;
 
     @Id
     @Column(name = "user_id")
     private Integer userId;
+
+    @Column(name = "user_name")
+    private String userName;
 
     @Id
     @Column(name = "attendance_date")
@@ -38,10 +46,17 @@ public class Attendance {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
 
+
     @Column(name = "attendance_class_code")
     private String attendanceClassCode;
+
+    @Column(name = "attendance_class_name")
+    private String attendanceClassName;
+
 
     @Column(name = "attendance_status_code")
     private String attendanceStatusCode;
 
+    @Column(name = "attendance_status_name")
+    private String attendanceStatusName;
 }

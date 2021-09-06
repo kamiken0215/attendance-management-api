@@ -4,6 +4,7 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class AttendanceClassSpecifications {
@@ -13,9 +14,9 @@ public class AttendanceClassSpecifications {
                 cb.equal(root.<Integer>get("companyId"),companyId);
     }
 
-    public static Specification<AttendanceClass> attendanceClassCodeContains(String classCode) {
-        return (root, query, cb) ->
-                cb.equal(root.get("classCode"),classCode);
+    public static Specification<AttendanceClass> attendanceClassCodeContains(String attendanceClassCode) {
+        return !StringUtils.hasText(attendanceClassCode) ? null : (Specification<AttendanceClass>) (root, query, cb) ->
+                cb.equal(root.get("attendanceClassCode"),attendanceClassCode);
     }
 
 

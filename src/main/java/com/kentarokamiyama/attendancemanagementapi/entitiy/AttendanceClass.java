@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -13,7 +14,12 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Table(name = "attendance_class")
 @Data
+@IdClass(AttendanceClassPK.class)
 public class AttendanceClass {
+
+    @Id
+    @Column(name = "company_id")
+    private Integer companyId;
 
     @Id
     @Column(name = "attendance_class_code")
@@ -22,10 +28,5 @@ public class AttendanceClass {
     @Column(name = "attendance_class_name")
     private String attendanceClassName;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
-    private Company company;
 
-    @Column(name = "company_id")
-    private Integer companyId;
 }

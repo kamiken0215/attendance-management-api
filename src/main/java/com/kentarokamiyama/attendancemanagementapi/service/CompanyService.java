@@ -32,8 +32,18 @@ public class CompanyService {
         );
     }
 
-    public Company save(Company company) {
-        return companyRepository.save(company);
+    public Company findOne(Integer companyId) {
+        Optional<Company> opt = companyRepository.findById(companyId);
+        return opt.orElse(null);
+    }
+
+    public Object save(Company company) {
+        try {
+            return companyRepository.save(company);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "不正なデータです";
+        }
     }
 
     public void delete (Company company) {

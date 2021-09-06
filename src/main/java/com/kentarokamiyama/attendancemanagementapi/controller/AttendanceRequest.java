@@ -17,6 +17,9 @@ import java.util.Date;
 public class AttendanceRequest {
 
     @NotEmpty
+    private Integer CompanyId;
+
+    @NotEmpty
     private Integer userId;
 
     private String attendanceDate;

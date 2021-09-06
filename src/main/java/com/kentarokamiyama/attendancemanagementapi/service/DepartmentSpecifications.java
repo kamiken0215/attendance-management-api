@@ -20,7 +20,7 @@ public class DepartmentSpecifications {
     }
 
     public static Specification<Department> departmentCodeContains(String departmentCode) {
-        return StringUtils.hasText(departmentCode) ? null : (root, query, cb) ->
+        return !StringUtils.hasText(departmentCode) ? null : (root, query, cb) ->
                 cb.equal(root.get("departmentCode"),departmentCode);
     }
 }

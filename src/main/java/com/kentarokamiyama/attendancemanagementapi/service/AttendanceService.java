@@ -2,31 +2,69 @@ package com.kentarokamiyama.attendancemanagementapi.service;
 
 import com.kentarokamiyama.attendancemanagementapi.controller.AttendanceRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceRepository;
+import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceViewRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Log
 public class AttendanceService {
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private AttendanceRepository attendanceRepository;
+    @Autowired
+    private AttendanceViewRepository attendanceViewRepository;
 
-    public List<Attendance> find(AttendanceRequest attendance) {
-        return attendanceRepository.findAll(Specification
-                .where(AttendanceSpecifications.userIdContains(attendance.getUserId()))
-                .and(AttendanceSpecifications.attendanceDateContains(attendance.getAttendanceDate()))
-                .and(AttendanceSpecifications.attendanceClassCodeContains(attendance.getAttendanceClassCode()))
-                .and(AttendanceSpecifications.attendanceStatusCodeContains(attendance.getAttendanceStatusCode()))
-        );
+    private final String EXECUTE_SQL = "---実行SQL------------------------------------------------";
+
+    public List<AttendanceView> find(AttendanceView attendanceView) {
+        log.severe(EXECUTE_SQL);
+        try {
+            return attendanceViewRepository.findAll(Specification
+                    .where(AttendanceViewSpecifications.companyIdContains(attendanceView.getCompanyId()))
+                    .and(AttendanceViewSpecifications.departmentCodeContains(attendanceView.getDepartmentCode()))
+                    .and(AttendanceViewSpecifications.attendanceClassCodeContains(attendanceView.getAttendanceClassCode()))
+                    .and(AttendanceViewSpecifications.attendanceStatusCodeContains(attendanceView.getAttendanceStatusCode()))
+                    .and(AttendanceViewSpecifications.userIdContains(attendanceView.getUserId()))
+                    .and(AttendanceViewSpecifications.attendanceDateContains(attendanceView.getAttendanceDate()))
+                    ,Sort.by(Sort.Direction.ASC,"userId").and(Sort.by(Sort.Direction.ASC,"attendanceDate"))
+            );
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return new ArrayList<>();
+        }
     }
+
+    public List<AttendanceView> findAll() {
+        try {
+            log.severe(EXECUTE_SQL);
+            return attendanceViewRepository.findAll();
+        } catch (Throwable t) {
+            log.severe("-------------------------------------");
+            log.severe(t.toString());
+            return new ArrayList<AttendanceView>();
+        }
+    }
+
+
+//    public List<Attendance> fetchAll(Integer companyId) {
+//        return attendanceRepository.fetchAll(companyId,null,
+//                null,
+//                null,
+//                null);
+//    }
 
     public long count (Attendance attendance) {
         return attendanceRepository.count(Specification
@@ -34,16 +72,33 @@ public class AttendanceService {
         );
     }
 
-    public Attendance save (Attendance attendance) {
-        return attendanceRepository.save(attendance);
+    public Object save (Attendance attendance) {
+        try {
+            return attendanceRepository.save(attendance);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "error";
+        }
     }
 
-    public void delete (Attendance attendance) {
-        List<Attendance> result = attendanceRepository.findAll(Specification
-                .where(AttendanceSpecifications.userIdContains(attendance.getUserId()))
-                .and(AttendanceSpecifications.attendanceDateContains(attendance.getAttendanceDate()))
-        );
-        attendanceRepository.deleteAll(result);
+    public String delete(Attendance attendance) {
+        try {
+            attendanceRepository.delete(attendance);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "error";
+        }
+    }
+
+    public String deleteAll (List<Attendance> attendances) {
+        try {
+            attendanceRepository.deleteAll(attendances);
+            return "";
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "削除失敗";
+        }
     }
 
     public boolean isNotExistUser(Integer userId, String loginUser) {

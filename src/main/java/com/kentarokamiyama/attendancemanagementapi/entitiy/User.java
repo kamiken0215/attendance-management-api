@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Primary;
 
 import javax.persistence.*;
 
@@ -17,7 +18,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "user_id",updatable = false)
     private Integer userId;
 
     @Column(name = "user_name")
@@ -43,7 +44,10 @@ public class User {
     private Integer companyId;
 
     @ManyToOne
-    @JoinColumn(name = "department_code",referencedColumnName = "department_code", insertable = false, updatable = false)
+    @JoinColumns({
+            @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false),
+            @JoinColumn(name = "department_code",referencedColumnName = "department_code", insertable = false, updatable = false)
+    })
     private Department department;
 
     @Column(name = "department_code")
@@ -55,6 +59,4 @@ public class User {
 
     @Column(name = "role_code")
     private String roleCode;
-
-
 }
