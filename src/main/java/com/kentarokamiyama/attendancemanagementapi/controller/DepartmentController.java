@@ -143,7 +143,8 @@ public class DepartmentController {
             if (deleteRet.length() > 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return CrudResponse.builder()
-                        .message(deletedCount + "件目エラー: " + deleteRet)
+                        .number(deletedCount)
+                        .message(deleteRet)
                         .ok(false)
                         .build()
                         .toJson();

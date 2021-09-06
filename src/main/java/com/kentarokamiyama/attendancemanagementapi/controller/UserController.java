@@ -3,6 +3,7 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -256,7 +257,11 @@ public class UserController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return "不正";
+            return CrudResponse.builder()
+                    .message("不正なユーザー")
+                    .ok(false)
+                    .build()
+                    .toJson();
         }
 
         User user = User.builder()
@@ -269,7 +274,11 @@ public class UserController {
 
         if (users.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return "";
+            return CrudResponse.builder()
+                    .message("該当ユーザーなし")
+                    .ok(false)
+                    .build()
+                    .toJson();
         }
 
         int deletedCount = 0;

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +15,11 @@ import lombok.NoArgsConstructor;
 @JsonFormat
 public class CrudResponse {
 
+    @Nullable
+    private Integer number;
+
     private String message;
+
     private boolean ok;
 
     public String toJson() {
