@@ -16,7 +16,7 @@
 {
 "companyId": 1,
 "companyName": "sample",
-"departments": deparmtnetList
+"departments": departmetList
 }
 ``
 
