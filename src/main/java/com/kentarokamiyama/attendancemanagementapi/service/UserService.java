@@ -60,9 +60,12 @@ public class UserService {
         try {
             userRepository.delete(user);
             return "";
-        } catch (Throwable t) {
+        }catch (Throwable t) {
             log.severe(t.toString());
-            return "削除失敗";
+            if (t.toString().contains("DataIntegrityViolationException")) {
+                return "ユーザーID:"+ user.getUserId() + " ユーザー名:" + user.getUserName() +"に関連するデータを消してください";
+            }
+            return "ユーザーID:"+ user.getUserId() + " ユーザー名:" + user.getUserName();
         }
     }
 

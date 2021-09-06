@@ -7,10 +7,14 @@ import com.kentarokamiyama.attendancemanagementapi.repository.DepartmentReposito
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +51,10 @@ public class DepartmentService {
             return "";
         } catch (Throwable t) {
             log.severe(t.toString());
-            return "失敗";
+            if (t.toString().contains("DataIntegrityViolationException")) {
+                return "部門コード:"+ department.getDepartmentCode() + " 部門名:" + department.getDepartmentName() +"に関連するデータを消してください";
+            }
+            return "部門コード:"+ department.getDepartmentCode() + " 部門名:" + department.getDepartmentName();
         }
     }
 

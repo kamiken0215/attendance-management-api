@@ -61,7 +61,10 @@ public class AttendanceClassService {
             return "";
         } catch (Throwable t) {
             log.severe(t.toString());
-            return "error";
+            if (t.toString().contains("DataIntegrityViolationException")) {
+                return "区分コード:"+ attendanceClass.getAttendanceClassCode() + " 区分名:" + attendanceClass.getAttendanceClassName() +"に関連するデータを消してください";
+            }
+            return "区分コード:"+ attendanceClass.getAttendanceClassCode() + " 区分名:" + attendanceClass.getAttendanceClassName();
         }
     }
 

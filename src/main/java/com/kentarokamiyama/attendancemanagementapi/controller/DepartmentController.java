@@ -1,8 +1,10 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.google.gson.Gson;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.DepartmentService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +142,12 @@ public class DepartmentController {
             deletedCount ++;
             if (deleteRet.length() > 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return deletedCount + "件目エラー";
+                return CrudResponse.builder()
+                        .message(deletedCount + "件目エラー: " + deleteRet)
+                        .ok(false)
+                        .build()
+                        .toJson();
+                //return deletedCount + "件目エラー";
             }
         }
 
