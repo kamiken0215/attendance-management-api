@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Primary;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 
@@ -36,6 +36,7 @@ public class User {
     @Column(name = "is_active")
     private String isActive;
 
+    @Nullable
     @ManyToOne
     @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false)
     private Company company;
@@ -43,6 +44,7 @@ public class User {
     @Column(name = "company_id")
     private Integer companyId;
 
+    @Nullable
     @ManyToOne
     @JoinColumns({
             @JoinColumn(name = "company_id",referencedColumnName = "company_id", insertable = false, updatable = false),
@@ -53,6 +55,7 @@ public class User {
     @Column(name = "department_code")
     private String departmentCode;
 
+    @Nullable
     @ManyToOne
     @JoinColumn(name = "role_code",referencedColumnName = "role_code", insertable = false, updatable = false)
     private Role role;
@@ -60,3 +63,4 @@ public class User {
     @Column(name = "role_code")
     private String roleCode;
 }
+

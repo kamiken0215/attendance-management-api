@@ -1,11 +1,13 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Data
 @Builder
@@ -13,22 +15,8 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 public class UserRequest {
 
-    private Integer userId;
-
-    private String userName;
-
-    private String email;
-
-    private String password;
-
-    private Integer paidHolidays;
-
-    private String isActive;
-
     @NotEmpty
     private Integer companyId;
 
-    private String departmentCode;
-
-    private String roleCode;
+    private List<User> users;
 }
