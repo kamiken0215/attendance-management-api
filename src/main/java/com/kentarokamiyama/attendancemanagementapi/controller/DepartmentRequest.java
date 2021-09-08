@@ -18,17 +18,4 @@ public class DepartmentRequest {
     @NotEmpty
     private Integer companyId;
     private List<Department> departments;
-
-    //  id : [
-    //      {
-    //      "code" : "code",
-    //      "name" : "hoge",
-    //      },
-    //      ...
-    //  ]
-    //private Map<Integer, List<Map<String,String>>> departments;
-
-//    private String departmentCode;
-//
-//    private String departmentName;
 }

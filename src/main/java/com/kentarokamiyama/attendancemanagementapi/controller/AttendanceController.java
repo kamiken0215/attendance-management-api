@@ -279,13 +279,11 @@ public class AttendanceController {
                             .build();
                 }
             }
-
             return CrudResponse.builder()
                     .number(deletedCount)
                     .message(deletedCount + "件削除")
                     .ok(true)
                     .build();
-
         }
 
         User user = User.builder()
@@ -335,13 +333,11 @@ public class AttendanceController {
                 }
             }
         }
-
         return CrudResponse.builder()
                 .number(deletedCount)
                 .message(deletedCount + "件削除")
                 .ok(true)
                 .build();
-
     }
 
     @DeleteMapping("admin/attendance")
