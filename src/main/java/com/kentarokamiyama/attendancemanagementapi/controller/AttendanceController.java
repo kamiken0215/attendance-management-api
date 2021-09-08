@@ -134,7 +134,11 @@ public class AttendanceController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         List<Attendance> attendances = attendanceRequest.getAttendances()
@@ -209,7 +213,7 @@ public class AttendanceController {
             "companies/{companyId}/departments/{departmentCode}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
-    public String deleteAttendance (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse deleteAttendance (HttpServletRequest request,HttpServletResponse response,
                                   @PathVariable(value = "companyId") Integer companyId,
                                   @PathVariable(value = "departmentCode",required = false) String departmentCode,
                                   @PathVariable(value = "userId",required = false) Integer userId,
@@ -227,7 +231,11 @@ public class AttendanceController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return "不正";
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         if (attendanceDate != null) {
@@ -242,7 +250,11 @@ public class AttendanceController {
 
             if (attendances.size() == 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return "";
+                return CrudResponse.builder()
+                        .number(0)
+                        .message("ユーザーが見つかりません")
+                        .ok(false)
+                        .build();
             }
 
             int deletedCount = 0;
@@ -260,11 +272,20 @@ public class AttendanceController {
                 deletedCount ++;
                 if (deleteRet.length() > 0) {
                     response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                    return deletedCount + "件目エラー";
+                    return CrudResponse.builder()
+                            .number(deletedCount)
+                            .message(deletedCount + "件目エラー")
+                            .ok(false)
+                            .build();
                 }
             }
 
-            return deletedCount +"件削除";
+            return CrudResponse.builder()
+                    .number(deletedCount)
+                    .message(deletedCount + "件削除")
+                    .ok(true)
+                    .build();
+
         }
 
         User user = User.builder()
@@ -276,7 +297,11 @@ public class AttendanceController {
         List<User> users = userService.find(user);
         if (users.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return "";
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("ユーザーが見つかりません")
+                    .ok(false)
+                    .build();
         }
 
         int deletedCount = 0;
@@ -302,12 +327,20 @@ public class AttendanceController {
                 deletedCount ++;
                 if (deleteRet.length() > 0) {
                     response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                    return deletedCount + "件目エラー";
+                    return CrudResponse.builder()
+                            .number(deletedCount)
+                            .message(deletedCount + "件目エラー")
+                            .ok(false)
+                            .build();
                 }
             }
         }
 
-        return deletedCount +"件削除";
+        return CrudResponse.builder()
+                .number(deletedCount)
+                .message(deletedCount + "件削除")
+                .ok(true)
+                .build();
 
     }
 
