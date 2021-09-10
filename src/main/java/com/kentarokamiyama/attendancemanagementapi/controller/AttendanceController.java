@@ -174,7 +174,7 @@ public class AttendanceController {
         }
         return CrudResponse.builder()
                 .number(savedCount)
-                .message(savedCount + "件")
+                .message(savedCount + "件完了")
                 .ok(true)
                 .build();
     }

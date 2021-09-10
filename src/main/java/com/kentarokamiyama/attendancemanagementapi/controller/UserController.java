@@ -145,7 +145,7 @@ public class UserController {
 //    }
 
     @PostMapping("/users")
-    public List<UserResponse> save (HttpServletRequest request,HttpServletResponse response,@RequestBody UserRequest userRequest) {
+    public CrudResponse save (HttpServletRequest request,HttpServletResponse response,@RequestBody UserRequest userRequest) {
 
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
@@ -161,11 +161,16 @@ public class UserController {
         if(authUser == null) {
             log.severe("認証エラー");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         List<User> users = userRequest.getUsers()
                 .stream()
+                .filter(user -> user.getCompanyId() != null && Objects.equals(user.getCompanyId(), userRequest.getCompanyId()))
                 .filter(user -> user.getDepartmentCode() != null)
                 .filter(user -> user.getUserName() != null)
                 .filter(user -> user.getEmail() != null && user.getEmail().length() > 0)
@@ -177,59 +182,43 @@ public class UserController {
 
         if (users.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ArrayList<>();
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("追加可能なデータはありません")
+                    .ok(false)
+                    .build();
         }
 
-        List<UserResponse> resultUsers = new ArrayList<>();
-
+        int savedCount = 0;
         for (User u : users) {
             try {
                 Active enm = Active.valueOf(u.getIsActive());
             } catch (IllegalArgumentException e) {
                 log.severe(e.toString());
-                UserResponse userResponse = UserResponse.builder().error("isActiveはonかoffを指定してください").build();
-                List<UserResponse> l = new ArrayList<>();
-                l.add(userResponse);
-                return l;
-            }
-
-            User user = User.builder()
-                    .userName(u.getUserName())
-                    .email(u.getEmail())
-                    .password(passwordEncoder.encode(u.getPassword()))
-                    .paidHolidays(u.getPaidHolidays())
-                    .isActive(u.getIsActive())
-                    .companyId(userRequest.getCompanyId())
-                    .departmentCode(u.getDepartmentCode())
-                    .roleCode(u.getRoleCode())
-                    .build();
-
-            Object result = userService.save(user);
-
-            if (result instanceof User) {
-                User r = (User) result;
-                UserResponse userResponse = UserResponse.builder()
-                        .userId(r.getUserId())
-                        .userName(r.getUserName())
-                        .companyId(r.getCompanyId())
-                        .departmentCode(r.getDepartmentCode())
-                        .email(r.getEmail())
-                        .isActive(r.getIsActive())
-                        .paidHolidays(r.getPaidHolidays())
-                        .roleCode(r.getRoleCode())
-                        .error("")
+                return CrudResponse.builder()
+                        .number(0)
+                        .message("ユーザー名"+u.getUserName()+"のiaActiveをonかoffにしてください")
+                        .ok(false)
                         .build();
-                resultUsers.add(userResponse);
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                List<UserResponse> l = new ArrayList<>();
-                UserResponse userResponse = UserResponse.builder().error(result.toString()).build();
-                l.add(userResponse);
-                return l;
             }
+            u.setPassword(passwordEncoder.encode(u.getPassword()) );
+            Object result = userService.save(u);
+            if (result instanceof String) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return CrudResponse.builder()
+                        .number(savedCount)
+                        .message(result.toString())
+                        .ok(false)
+                        .build();
+            }
+            savedCount++;
         }
 
-        return resultUsers;
+        return CrudResponse.builder()
+                .number(savedCount)
+                .message(savedCount + "件")
+                .ok(true)
+                .build();
     }
 
 //    @PostMapping("/admin/users")
@@ -315,11 +304,19 @@ public class UserController {
             String result = userService.delete(u);
             deletedCount ++;
             if (result.length() > 0) {
-                return deletedCount + "件目エラー";
+                return CrudResponse.builder()
+                        .message(deletedCount + "件目エラー")
+                        .ok(false)
+                        .build()
+                        .toJson();
             }
         }
 
-        return deletedCount +"件削除";
+        return CrudResponse.builder()
+                .message(deletedCount + "件削除")
+                .ok(true)
+                .build()
+                .toJson();
     }
 
 //    @DeleteMapping("/admin/users")
