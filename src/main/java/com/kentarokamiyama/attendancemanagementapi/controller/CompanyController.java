@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,19 +46,29 @@ public class CompanyController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CompanyResponse.builder()
+                    .companyId(null)
+                    .companyName("")
+                    .departments(new HashSet<>())
+                    .error("不正なユーザーです")
+                    .build();
         }
 
         Company result = companyService.findOne(companyId);
 
         if (result == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return CompanyResponse.builder()
+                    .companyId(null)
+                    .companyName("")
+                    .departments(new HashSet<>())
+                    .error("みつかりませんでした")
+                    .build();
         } else {
             return CompanyResponse.builder()
                     .companyId(result.getCompanyId())
                     .companyName(result.getCompanyName())
-                    //.departments(result.getDepartment())
+                    .departments(result.getDepartments().stream().sorted(Comparator.comparing(Department::getDepartmentCode)).collect(Collectors.toCollection(LinkedHashSet::new)))
                     .build();
         }
     }
