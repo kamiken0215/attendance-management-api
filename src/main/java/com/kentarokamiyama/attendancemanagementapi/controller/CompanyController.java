@@ -2,6 +2,7 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.*;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -79,7 +80,7 @@ public class CompanyController {
     }
 
     @PostMapping("/companies")
-    public CompanyResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
+    public CrudResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
@@ -93,7 +94,11 @@ public class CompanyController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         Company company = Company.builder()
@@ -102,14 +107,21 @@ public class CompanyController {
                 .build();
 
         Object result = companyService.save(company);
-        if (result instanceof Company) {
-            Company c = (Company) result;
-            return CompanyResponse.builder()
-                    .companyId(c.getCompanyId())
-                    .companyName(c.getCompanyName())
+
+        if (result instanceof String) {
+
+            return CrudResponse.builder()
+                    .number(1)
+                    .message(result.toString())
+                    .ok(false)
                     .build();
+
         } else {
-            return CompanyResponse.builder().error(result.toString()).build();
+            return CrudResponse.builder()
+                    .number(1)
+                    .message("ok")
+                    .ok(true)
+                    .build();
         }
     }
 
