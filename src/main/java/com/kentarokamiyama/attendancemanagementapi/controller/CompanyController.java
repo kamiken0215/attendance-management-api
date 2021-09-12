@@ -143,7 +143,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/companies/{companyId}")
-    public String deleteCompany (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse deleteCompany (HttpServletRequest request,HttpServletResponse response,
                                  @PathVariable(value = "companyId") Integer companyId) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
@@ -165,13 +165,21 @@ public class CompanyController {
 
         if (checkResult.length() != 0) {
             response.setStatus(HttpServletResponse.SC_FOUND);
-            return checkResult;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message(checkResult)
+                    .ok(false)
+                    .build();
         }
 
         Company company = Company.builder().companyId(companyId).build();
         companyService.delete(company);
 
-        return "";
+        return CrudResponse.builder()
+                .number(1)
+                .message("")
+                .ok(true)
+                .build();
     }
 
     //  1.count attendance
