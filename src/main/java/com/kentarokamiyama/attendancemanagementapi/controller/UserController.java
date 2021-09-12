@@ -3,6 +3,7 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
+import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserController {
     @GetMapping({"companies/{companyId}/users",
             "companies/{companyId}/departments/{departmentCode}/users",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}"})
-    public List<UserResponse> find (HttpServletRequest request,HttpServletResponse response,
+    public UserResponse find (HttpServletRequest request,HttpServletResponse response,
                               @PathVariable(value = "companyId") Integer companyId,
                               @PathVariable(value = "departmentCode",required = false) String departmentCode,
                               @PathVariable(value = "userId",required = false) Integer userId) {
@@ -66,9 +67,11 @@ public class UserController {
                 .build();
 
         List<User> users = userService.find(user);
-        List<UserResponse> userResponses = new ArrayList<>();
+        LinkedList<UserResponseModel> userResponseModels = new LinkedList<>();
         for (User u:users) {
-            UserResponse userResponse = UserResponse.builder()
+            assert u.getCompany() != null;
+            assert u.getDepartment() != null;
+            UserResponseModel model = UserResponseModel.builder()
                     .userId(u.getUserId())
                     .userName(u.getUserName())
                     .companyId(u.getCompanyId())
@@ -80,9 +83,12 @@ public class UserController {
                     .paidHolidays(u.getPaidHolidays())
                     .roleCode(u.getRoleCode())
                     .build();
-            userResponses.add(userResponse);
+            userResponseModels.add(model);
         }
-        return userResponses;
+
+        return UserResponse.builder()
+                .users(userResponseModels)
+                .build();
     }
 
 //    @PostMapping("/users")

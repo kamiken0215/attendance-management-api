@@ -1,9 +1,12 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 
 @Data
@@ -12,25 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserResponse {
 
-    private Integer userId;
-
-    private String userName;
-
-    private String email;
-
-    private Integer paidHolidays;
-
-    private String isActive;
-
-    private Integer companyId;
-
-    private String companyName;
-
-    private String departmentCode;
-
-    private String departmentName;
-
-    private String roleCode;
+    private List<UserResponseModel> users;
 
     private String error;
 }
