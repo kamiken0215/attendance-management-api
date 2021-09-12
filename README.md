@@ -1,4 +1,4 @@
-# Attendance Management API (Unfinished)
+# Attendance Management API
 
 
 
@@ -20,13 +20,21 @@
 
 ### GETメソッドのレスポンス
 
-1. エラーがあればerrorパラメータにエラー文が格納されます。
+1. エラーがあればerrorパラメータにエラー文が格納されます。なければerrorはnullとなります。
 
 ```json
 {
     "companyId"   : null,
     "companyName" : null,
     "error"       : "情報を取得できませんでした"
+}
+```
+
+```json
+{
+    "companyId"   : 1,
+    "companyName" : "test",
+    "error"       : null
 }
 ```
 
@@ -41,7 +49,7 @@
 | ---- | ---- | ---- |
 |  number  |  String  |  処理対象データの件数  |
 |  message  |  Integer  |  エラーメッセージ  |
-|  ok  |  Boolean  |  true(Success) / false(Error)  |
+|  ok  |  Boolean  |  true(success) / false(error)  |
 
 
 Success
@@ -376,10 +384,10 @@ Example:
 
 ```json
 {
-    "companyId": 3,
+    "companyId": 1,
     "users":[
         {
-            "companyId":3,
+            "companyId":1,
             "userName": "addtest1",
             "email": "ins3@gmail.com",
             "password":"test",
@@ -390,7 +398,7 @@ Example:
             "roleCode": "7777"
         },
         {
-            "companyId":3,
+            "companyId":1,
             "userName": "addtest2",
             "email": "ins4@gmail.com",
             "password":"test",
@@ -422,10 +430,10 @@ Example:
 
 ```json
 {
-    "companyId": 3,
+    "companyId": 1,
     "users":[
         {
-            "companyId":3,
+            "companyId":1,
             "userId":40,
             "userName": "addtest1",
             "email": "upd3@gmail.com",
@@ -437,7 +445,7 @@ Example:
             "roleCode": "7777"
         },
         {
-            "companyId":3,
+            "companyId":1,
             "userId":41,
             "userName": "addtest2",
             "email": "upd@gmail.com",
@@ -488,4 +496,398 @@ none
 共通事項　POST/DELETEメソッドのレスポンス参考
 
 
+## ATTENDANCE CLASS
+
+### GET
+
+所属している会社の勤怠区分の情報を取得できます
+
+- 勤怠区分一覧
+
+**Request:**
+
+`/companies/{companyId}/classes`
+
+**Data:**
+
+none
+
+**Response:**
+
+Example:
+`companies/1/classes`
+
+```json
+{
+    "attendanceClasses": [
+        {
+            "companyId": 1,
+            "attendanceClassCode": "101",
+            "attendanceClassName": "出勤3",
+            "startTime": "08:00:00",
+            "endTime": "17:00:00"
+        },
+        {
+            "companyId": 1,
+            "attendanceClassCode": "102",
+            "attendanceClassName": "フレックス",
+            "startTime": "09:00:00",
+            "endTime": "18:00:00"
+        }
+    ],
+    "error": null
+}
+```
+
+- 単一区分
+
+`/companies/{companyId}/classes/{attendanceClassCode}`
+
+### POST
+- 追加
+
+所属している会社の勤怠区分を追加できます。
+編集権限を所有している必要があります。
+
+**Request:**
+
+`/classes`
+
+**Data:**
+
+```json
+{
+    "companyId": 1,
+    "attendanceClasses":[
+        {
+            "companyId": 1,
+            "attendanceClassCode": "998",
+            "attendanceClassName": "出勤998",
+            "startTime": "08:00:00",
+            "endTime": "17:00:00"
+        },
+            {
+            "companyId": 1,
+            "attendanceClassCode": "999",
+            "attendanceClassName": "test",
+            "startTime": "08:00:00",
+            "endTime": "17:00:00"
+        }
+    ]
+}
+```
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
+
+- 編集
+
+
+所属している会社の区分情報を変更できます。
+編集権限を所有している必要があります
+
+**Request:**
+
+`/classes`
+
+**Data:**
+
+追加と同じ
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
+
+###DELETE
+
+所属している会社を削除できます。<br>
+削除するためには、紐づいている以下のデータを先に削除する必要があります。
+- 出退勤データ
+
+**Request:**
+
+1. 会社ごとに削除
+
+`/companies/{companyId}/classes`
+
+2. 区分ごとに削除
+
+`/companies/{companyId}/classes/{attendanceClassCode}`
+
+**Data:**
+
+none
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
+
+## ATTENDANCE DATE
+
+### GET
+
+所属している会社のユーザーの勤怠情報を取得できます
+
+- 勤怠区分一覧
+
+**Request:**
+
+`companies/{companyId}/attendances`
+
+**Data:**
+
+none
+
+**Response:**
+
+Example:
+`companies/1/attendances`
+
+```json
+[
+    {
+        "userId": 1,
+        "attendances": [
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 1,
+                "userName": "test1",
+                "attendanceDate": "20200123",
+                "startTime": "2020-01-23 09:52:31",
+                "endTime": "2020-01-23 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            },
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 1,
+                "userName": "test1",
+                "attendanceDate": "20210624",
+                "startTime": "2021-06-24 09:52:31",
+                "endTime": "2021-06-24 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            }
+        ],
+        "error": ""
+    },
+    {
+        "userId": 2,
+        "attendances": [
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 2,
+                "userName": "test2",
+                "attendanceDate": "20200701",
+                "startTime": "2020-07-01 09:52:31",
+                "endTime": "2020-07-01 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            },
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 2,
+                "userName": "test2",
+                "attendanceDate": "20210822",
+                "startTime": "2021-08-22 09:52:31",
+                "endTime": "2021-08-22 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            }
+        ],
+        "error": ""
+    }
+]
+```
+
+- 部門毎
+
+`companies/{companyId}/departments/{departmentCode}/attendances`
+
+- ユーザーごと
+
+`companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances`
+
+- 日毎
+
+`companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}`
+
+attendanceDateは前方一致です。
+例えば2021年のデータを全て取得したい場合はattendanceDateを2021に、
+2021年7月のデータを取得したい場合は202107、
+2021年7月22日のデータを取得したい場合は20210722としてください。
+
+
+**Response:**
+
+Example:
+`companies/1/departments/101/users/1/attendances/2021`
+
+```json
+[
+    {
+        "userId": 1,
+        "attendances": [
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 1,
+                "userName": "test1",
+                "attendanceDate": "20210822",
+                "startTime": "2021-08-22 09:52:31",
+                "endTime": "2021-08-22 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            },
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 1,
+                "userName": "test1",
+                "attendanceDate": "20210824",
+                "startTime": "2021-08-24 09:52:31",
+                "endTime": "2021-08-24 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            }
+        ],
+        "error": ""
+    }
+]
+```
+
+Example:
+`companies/1/departments/101/users/1/attendances/20210824`
+
+```json
+[
+    {
+        "userId": 1,
+        "attendances": [
+            {
+                "companyId": 1,
+                "departmentCode": "101",
+                "userId": 1,
+                "userName": "test1",
+                "attendanceDate": "20210824",
+                "startTime": "2021-08-24 09:52:31",
+                "endTime": "2021-08-24 18:52:31",
+                "attendanceClassCode": "101",
+                "attendanceClassName": "出勤3",
+                "attendanceStatusCode": "101",
+                "attendanceStatusName": "on"
+            }
+        ],
+        "error": ""
+    }
+]
+```
+
+
+### POST
+- 追加
+
+所属している会社のユーザーの勤怠を追加できます。
+編集権限を所有している必要があります。
+
+**Request:**
+
+`/attendances`
+
+**Data:**
+
+```json
+{
+    "companyId": 1,
+    "attendances": [
+        {
+            "userId": 1,
+            "attendanceDate": "20210901",
+            "startTime": "2021-09-01 09:52:31",
+            "endTime": "2021-09-01 18:52:31",
+            "attendanceClassCode": "101",
+            "attendanceStatusCode": "101"
+        },
+        {
+            "userId": 33,
+            "attendanceDate": "20210902",
+            "startTime": "2021-09-02 09:52:31",
+            "endTime": "2021-09-02 18:52:31",
+            "attendanceClassCode": "101",
+            "attendanceStatusCode": "101"
+        }
+    ]
+}
+```
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
+
+- 編集
+
+
+所属している会社のユーザーの出勤データを変更できます。
+編集権限を所有している必要があります
+
+**Request:**
+
+`/attendances`
+
+**Data:**
+
+追加と同じ
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
+
+###DELETE
+
+所属している会社のユーザーの出勤データを削除できます。<br>
+削除するためには、紐づいている以下のデータを先に削除する必要があります。
+- 出退勤データ
+
+**Request:**
+
+1. 会社ごとに削除
+
+`companies/{companyId}/attendances`
+
+2. 部門ごとに削除
+
+`companies/{companyId}/departments/{departmentCode}/attendances`
+
+3. ユーザーごとに削除
+
+`companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances`
+
+4. 日毎に削除
+
+`companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}`
+
+**Data:**
+
+none
+
+**Response:**
+
+共通事項　POST/DELETEメソッドのレスポンス参考
 
