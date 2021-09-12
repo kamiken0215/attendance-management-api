@@ -25,4 +25,8 @@ public class Company {
     @Column(name = "company_name")
     private String companyName;
 
+    @OneToMany
+    @JoinColumn(name = "company_id")
+    private Set<Department> departments;
+
 }

@@ -2,12 +2,16 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.*;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,19 +47,29 @@ public class CompanyController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CompanyResponse.builder()
+                    .companyId(null)
+                    .companyName("")
+                    .departments(new HashSet<>())
+                    .error("不正なユーザーです")
+                    .build();
         }
 
         Company result = companyService.findOne(companyId);
 
         if (result == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+            return CompanyResponse.builder()
+                    .companyId(null)
+                    .companyName("")
+                    .departments(new HashSet<>())
+                    .error("みつかりませんでした")
+                    .build();
         } else {
             return CompanyResponse.builder()
                     .companyId(result.getCompanyId())
                     .companyName(result.getCompanyName())
-                    //.departments(result.getDepartment())
+                    .departments(result.getDepartments().stream().sorted(Comparator.comparing(Department::getDepartmentCode)).collect(Collectors.toCollection(LinkedHashSet::new)))
                     .build();
         }
     }
@@ -66,7 +80,7 @@ public class CompanyController {
     }
 
     @PostMapping("/companies")
-    public CompanyResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
+    public CrudResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
@@ -80,7 +94,11 @@ public class CompanyController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         Company company = Company.builder()
@@ -89,14 +107,21 @@ public class CompanyController {
                 .build();
 
         Object result = companyService.save(company);
-        if (result instanceof Company) {
-            Company c = (Company) result;
-            return CompanyResponse.builder()
-                    .companyId(c.getCompanyId())
-                    .companyName(c.getCompanyName())
+
+        if (result instanceof String) {
+
+            return CrudResponse.builder()
+                    .number(1)
+                    .message(result.toString())
+                    .ok(false)
                     .build();
+
         } else {
-            return CompanyResponse.builder().error(result.toString()).build();
+            return CrudResponse.builder()
+                    .number(1)
+                    .message("ok")
+                    .ok(true)
+                    .build();
         }
     }
 
@@ -118,7 +143,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/companies/{companyId}")
-    public String deleteCompany (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse deleteCompany (HttpServletRequest request,HttpServletResponse response,
                                  @PathVariable(value = "companyId") Integer companyId) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
@@ -140,13 +165,21 @@ public class CompanyController {
 
         if (checkResult.length() != 0) {
             response.setStatus(HttpServletResponse.SC_FOUND);
-            return checkResult;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message(checkResult)
+                    .ok(false)
+                    .build();
         }
 
         Company company = Company.builder().companyId(companyId).build();
         companyService.delete(company);
 
-        return "";
+        return CrudResponse.builder()
+                .number(1)
+                .message("")
+                .ok(true)
+                .build();
     }
 
     //  1.count attendance

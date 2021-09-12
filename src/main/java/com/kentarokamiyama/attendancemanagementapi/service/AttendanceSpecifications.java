@@ -19,8 +19,8 @@ public class AttendanceSpecifications {
     }
 
     public static Specification<Attendance> departmentCodeContains(String departmentCode) {
-        return (root, query, cb) ->
-                cb.equal(root.<Integer>get("departmentCode"),departmentCode);
+        return !StringUtils.hasText(departmentCode) ? null : (Specification<Attendance>) (root, query, cb) ->
+                cb.equal(root.get("departmentCode"),departmentCode);
     }
 
     public static Specification<Attendance> attendanceClassCodeContains(String attendanceClassCode) {

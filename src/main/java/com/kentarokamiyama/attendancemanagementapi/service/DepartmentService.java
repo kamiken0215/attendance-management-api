@@ -41,8 +41,13 @@ public class DepartmentService {
         );
     }
 
-    public List<Department> save (List<Department> departments) {
-        return departmentRepository.saveAll(departments);
+    public Object save (Department department) {
+        try {
+            return departmentRepository.save(department);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "error";
+        }
     }
 
     public String delete (Department department) {

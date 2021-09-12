@@ -49,7 +49,7 @@ public class UserService {
         } catch (Throwable t) {
            log.severe(t.toString());
            if (t.getCause().toString().contains("ConstraintViolationException")) {
-               return "メールアドレスを他のものに変更してください";
+               return "";
            } else {
                return "再度時間を置いてから実行してください";
            }

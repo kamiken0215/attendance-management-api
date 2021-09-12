@@ -1,6 +1,5 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
-import com.google.gson.Gson;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
@@ -61,7 +60,7 @@ public class DepartmentController {
     }
 
     @PostMapping("/departments")
-    public List<Department> save (HttpServletRequest request, HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
+    public CrudResponse save (HttpServletRequest request, HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
@@ -75,7 +74,11 @@ public class DepartmentController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return new ArrayList<>();
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
         List<Department> departments = departmentRequest.getDepartments()
                 .stream()
@@ -86,31 +89,51 @@ public class DepartmentController {
 
         if (departments.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ArrayList<>();
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("追加可能なデータはありません")
+                    .ok(false)
+                    .build();
         }
 
-        return departmentService.save(departments);
-    }
-
-    @PostMapping("admin/company/department")
-    public List<Department> save (HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
-
-        List<Department> departments = departmentRequest.getDepartments()
-                .stream()
-                .filter(department -> department.getCompanyId() != null)
-                .filter(department -> department.getDepartmentCode() != null)
-                .filter(department -> department.getDepartmentName() != null)
-                .collect(Collectors.toList());
-
-        if (departments.size() == 0) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+        int savedCount = 0;
+        for (Department d : departments) {
+            Object result = departmentService.save(d);
+            if (result instanceof String) {
+                return CrudResponse.builder()
+                        .number(savedCount)
+                        .message(result.toString())
+                        .ok(false)
+                        .build();
+            }
+            savedCount ++;
         }
-        return departmentService.save(departments);
+        return CrudResponse.builder()
+                .number(savedCount)
+                .message(savedCount + "件")
+                .ok(true)
+                .build();
     }
+
+//    @PostMapping("admin/company/department")
+//    public List<Department> save (HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
+//
+//        List<Department> departments = departmentRequest.getDepartments()
+//                .stream()
+//                .filter(department -> department.getCompanyId() != null)
+//                .filter(department -> department.getDepartmentCode() != null)
+//                .filter(department -> department.getDepartmentName() != null)
+//                .collect(Collectors.toList());
+//
+//        if (departments.size() == 0) {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            return null;
+//        }
+//        return departmentService.save(departments);
+//    }
 
     @DeleteMapping({"/companies/{companyId}/departments","/companies/{companyId}/departments/{departmentCode}"})
-    public String delete (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse delete (HttpServletRequest request,HttpServletResponse response,
                           @PathVariable(value = "companyId") Integer companyId,
                           @PathVariable(value = "departmentCode",required = false) String departmentCode) {
         String token = request.getHeader("Authorization").substring(7);
@@ -126,7 +149,11 @@ public class DepartmentController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return "不正";
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         Department department = Department.builder()
@@ -135,6 +162,15 @@ public class DepartmentController {
                 .build();
 
         List<Department> departments = departmentService.find(department);
+
+        if (departments.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("削除可能なデータはありません")
+                    .ok(false)
+                    .build();
+        }
 
         int deletedCount = 0;
         for (Department d : departments) {
@@ -146,13 +182,14 @@ public class DepartmentController {
                         .number(deletedCount)
                         .message(deleteRet)
                         .ok(false)
-                        .build()
-                        .toJson();
-                //return deletedCount + "件目エラー";
+                        .build();
             }
         }
-
-        return deletedCount +"件削除";
+        return CrudResponse.builder()
+                .number(deletedCount)
+                .message(deletedCount + "件削除")
+                .ok(true)
+                .build();
     }
 
     @DeleteMapping("/admin/company/department")

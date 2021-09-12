@@ -4,6 +4,7 @@ import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import lombok.extern.java.Log;
@@ -64,17 +65,12 @@ public class AttendanceController {
 
             LinkedList<AttendanceResponse> attendanceResponses = new LinkedList<>();
             List<AttendanceView> attendances = attendanceService.find(attendance);
-            for (AttendanceView a : attendances) {
+
+            if (attendances.size() > 0) {
                 AttendanceResponse resp = AttendanceResponse.builder()
-                        .userId(a.getUserId())
-                        .userName(a.getUserName())
-                        .attendanceDate(a.getAttendanceDate())
-                        .startTime(a.getStartTime())
-                        .endTime(a.getEndTime())
-                        .attendanceClassCode(a.getAttendanceClassCode())
-                        .attendanceClassName(a.getAttendanceClassName())
-                        .attendanceStatusCode(a.getAttendanceStatusCode())
-                        .attendanceStatusName(a.getAttendanceStatusName())
+                        .userId(attendances.get(0).getUserId())
+                        .attendances(attendances)
+                        .error("")
                         .build();
                 attendanceResponses.add(resp);
             }
@@ -98,39 +94,33 @@ public class AttendanceController {
                     .userId(u.getUserId())
                     .build();
             List<AttendanceView> attendances = attendanceService.find(attendance);
-            for (AttendanceView a : attendances) {
+
+            if (attendances.size() > 0) {
                 AttendanceResponse resp = AttendanceResponse.builder()
-                        .userId(a.getUserId())
-                        .userName(a.getUserName())
-                        .attendanceDate(a.getAttendanceDate())
-                        .startTime(a.getStartTime())
-                        .endTime(a.getEndTime())
-                        .attendanceClassCode(a.getAttendanceClassCode())
-                        .attendanceClassName(a.getAttendanceClassName())
-                        .attendanceStatusCode(a.getAttendanceStatusCode())
-                        .attendanceStatusName(a.getAttendanceStatusName())
+                        .userId(attendances.get(0).getUserId())
+                        .attendances(attendances)
+                        .error("")
                         .build();
                 attendanceResponses.add(resp);
             }
-            attendances.clear();
         }
 
         return attendanceResponses;
     }
 
-    @GetMapping("admin/attendance")
-    public List<AttendanceView> find (@RequestBody AttendanceRequest attendanceRequest) {
-        AttendanceView attendance = AttendanceView.builder()
-                .userId(attendanceRequest.getUserId())
-                .attendanceDate(attendanceRequest.getAttendanceDate())
-                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
-                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
-                .build();
-        return attendanceService.find(attendance);
-    }
+//    @GetMapping("admin/attendance")
+//    public List<AttendanceView> find (@RequestBody AttendanceRequest attendanceRequest) {
+//        AttendanceView attendance = AttendanceView.builder()
+//                .userId(attendanceRequest.getUserId())
+//                .attendanceDate(attendanceRequest.getAttendanceDate())
+//                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
+//                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
+//                .build();
+//        return attendanceService.find(attendance);
+//    }
 
     @PostMapping("/attendances")
-    public AttendanceResponse saveAttendance (HttpServletRequest request,HttpServletResponse response,@RequestBody AttendanceRequest attendanceRequest) {
+    public CrudResponse saveAttendance (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceRequest attendanceRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
@@ -144,76 +134,86 @@ public class AttendanceController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
-        //  本人確認
-        if (attendanceRequest.getUserId() != null) {
-            if (!attendanceRequest.getUserId().equals(authUser.getUserId())) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return null;
+        List<Attendance> attendances = attendanceRequest.getAttendances()
+                .stream()
+                .filter(attendance -> attendance.getUserId() != null)
+                .filter(attendance -> attendance.getAttendanceDate() != null && attendance.getAttendanceDate().matches("\\d{4}\\d{2}\\d{2}"))
+                .filter(attendance -> attendance.getStartTime() != null)
+                .filter(attendance -> attendance.getEndTime() != null)
+                .filter(attendance -> attendance.getAttendanceClassCode() != null)
+                .filter(attendance -> attendance.getAttendanceStatusCode() != null)
+                .collect(Collectors.toList());
+
+        if (attendances.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("追加可能なデータはありません")
+                    .ok(false)
+                    .build();
+        }
+
+        int savedCount = 0;
+        for (Attendance a : attendances) {
+            Object result = attendanceService.save(a);
+            if (result instanceof String) {
+                return CrudResponse.builder()
+                        .number(savedCount)
+                        .message(result.toString())
+                        .ok(false)
+                        .build();
             }
+            savedCount ++;
         }
-
-        Attendance attendance = Attendance.builder()
-                .userId(attendanceRequest.getUserId())
-                .attendanceDate(attendanceRequest.getAttendanceDate())
-                .startTime(attendanceRequest.getStartTime())
-                .endTime(attendanceRequest.getEndTime())
-                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
-                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
+        return CrudResponse.builder()
+                .number(savedCount)
+                .message(savedCount + "件完了")
+                .ok(true)
                 .build();
-
-        Object result = attendanceService.save(attendance);
-
-        if (result instanceof Attendance) {
-            Attendance a = (Attendance) result;
-            return AttendanceResponse.builder()
-                    .userId(a.getUserId())
-                    .attendanceDate(a.getAttendanceDate())
-                    .startTime(a.getStartTime())
-                    .endTime(a.getEndTime())
-                    .attendanceClassCode(a.getAttendanceClassCode())
-                    .attendanceStatusCode(a.getAttendanceStatusCode())
-                    .build();
-        } else {
-            return AttendanceResponse.builder().error(result.toString()).build();
-        }
-
     }
 
-    @PostMapping("admin/attendance")
-    public AttendanceResponse saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
-        Attendance attendance = new Attendance();
-        attendance.setUserId(attendanceRequest.getUserId());
-        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-        attendance.setStartTime(attendanceRequest.getStartTime());
-        attendance.setEndTime(attendanceRequest.getEndTime());
-        attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
-        attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-
-        Object result = attendanceService.save(attendance);
-
-        if (result instanceof Attendance) {
-            Attendance a = (Attendance) result;
-            return AttendanceResponse.builder()
-                    .userId(a.getUserId())
-                    .attendanceDate(a.getAttendanceDate())
-                    .startTime(a.getStartTime())
-                    .endTime(a.getEndTime())
-                    .attendanceClassCode(a.getAttendanceClassCode())
-                    .attendanceStatusCode(a.getAttendanceStatusCode())
-                    .build();
-        } else {
-            return AttendanceResponse.builder().error(result.toString()).build();
-        }
-    }
+//    @PostMapping("admin/attendance")
+//    public AttendanceResponse saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
+//
+//
+//
+//        Attendance attendance = new Attendance();
+//        attendance.setUserId(attendanceRequest.getUserId());
+//        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
+//        attendance.setStartTime(attendanceRequest.getStartTime());
+//        attendance.setEndTime(attendanceRequest.getEndTime());
+//        attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
+//        attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
+//
+//        Object result = attendanceService.save(attendance);
+//
+//        if (result instanceof Attendance) {
+//            Attendance a = (Attendance) result;
+//            return AttendanceResponse.builder()
+//                    .userId(a.getUserId())
+//                    .attendanceDate(a.getAttendanceDate())
+//                    .startTime(a.getStartTime())
+//                    .endTime(a.getEndTime())
+//                    .attendanceClassCode(a.getAttendanceClassCode())
+//                    .attendanceStatusCode(a.getAttendanceStatusCode())
+//                    .build();
+//        } else {
+//            return AttendanceResponse.builder().error(result.toString()).build();
+//        }
+//    }
 
     @DeleteMapping({"companies/{companyId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
-    public String deleteAttendance (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse deleteAttendance (HttpServletRequest request,HttpServletResponse response,
                                   @PathVariable(value = "companyId") Integer companyId,
                                   @PathVariable(value = "departmentCode",required = false) String departmentCode,
                                   @PathVariable(value = "userId",required = false) Integer userId,
@@ -231,7 +231,11 @@ public class AttendanceController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return "不正";
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         if (attendanceDate != null) {
@@ -246,7 +250,11 @@ public class AttendanceController {
 
             if (attendances.size() == 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return "";
+                return CrudResponse.builder()
+                        .number(0)
+                        .message("ユーザーが見つかりません")
+                        .ok(false)
+                        .build();
             }
 
             int deletedCount = 0;
@@ -264,11 +272,18 @@ public class AttendanceController {
                 deletedCount ++;
                 if (deleteRet.length() > 0) {
                     response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                    return deletedCount + "件目エラー";
+                    return CrudResponse.builder()
+                            .number(deletedCount)
+                            .message(deletedCount + "件目エラー")
+                            .ok(false)
+                            .build();
                 }
             }
-
-            return deletedCount +"件削除";
+            return CrudResponse.builder()
+                    .number(deletedCount)
+                    .message(deletedCount + "件削除")
+                    .ok(true)
+                    .build();
         }
 
         User user = User.builder()
@@ -280,7 +295,11 @@ public class AttendanceController {
         List<User> users = userService.find(user);
         if (users.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return "";
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("ユーザーが見つかりません")
+                    .ok(false)
+                    .build();
         }
 
         int deletedCount = 0;
@@ -306,13 +325,19 @@ public class AttendanceController {
                 deletedCount ++;
                 if (deleteRet.length() > 0) {
                     response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                    return deletedCount + "件目エラー";
+                    return CrudResponse.builder()
+                            .number(deletedCount)
+                            .message(deletedCount + "件目エラー")
+                            .ok(false)
+                            .build();
                 }
             }
         }
-
-        return deletedCount +"件削除";
-
+        return CrudResponse.builder()
+                .number(deletedCount)
+                .message(deletedCount + "件削除")
+                .ok(true)
+                .build();
     }
 
     @DeleteMapping("admin/attendance")
