@@ -4,6 +4,7 @@ import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceClassRepository;
 import com.kentarokamiyama.attendancemanagementapi.service.AttendanceClassService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
@@ -27,7 +28,7 @@ public class AttendanceClassController {
     private AttendanceClassService attendanceClassService;
 
     @GetMapping({"/companies/{companyId}/classes","/companies/{companyId}/classes/{attendanceClassCode}"})
-    public List<AttendanceClass> find (HttpServletRequest request,HttpServletResponse response,
+    public AttendanceClassResponse find (HttpServletRequest request,HttpServletResponse response,
                                        @PathVariable(value = "companyId") Integer companyId,
                                        @PathVariable(value = "attendanceClassCode",required = false) String attendanceClassCode) {
         String token = request.getHeader("Authorization").substring(7);
@@ -43,7 +44,7 @@ public class AttendanceClassController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return AttendanceClassResponse.builder().error("不正なユーザー").build();
         }
 
         AttendanceClass attendanceClass = AttendanceClass.builder()
@@ -51,7 +52,13 @@ public class AttendanceClassController {
                 .attendanceClassCode(attendanceClassCode)
                 .build();
 
-        return attendanceClassService.find(attendanceClass);
+        List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClass);
+
+        if (attendanceClasses.size() == 0) {
+            return AttendanceClassResponse.builder().error("データがありません").build();
+        }
+
+        return AttendanceClassResponse.builder().attendanceClasses(attendanceClasses).build();
     }
 
     @GetMapping("/admin/company/attendance-class")
@@ -61,7 +68,7 @@ public class AttendanceClassController {
     }
 
     @PostMapping("/classes")
-    public List<AttendanceClass> save (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
+    public CrudResponse save (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceClassRequest attendanceClassRequest) {
 
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
@@ -76,43 +83,69 @@ public class AttendanceClassController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return new ArrayList<>();
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
         List<AttendanceClass> attendanceClasses = attendanceClassRequest.getAttendanceClasses()
                 .stream()
                 .filter(attendanceClass -> attendanceClass.getCompanyId() != null)
                 .filter(attendanceClass -> attendanceClass.getAttendanceClassCode() != null)
                 .filter(attendanceClass -> attendanceClass.getAttendanceClassName() != null)
+                .filter(attendanceClass -> attendanceClass.getStartTime() != null)
+                .filter(attendanceClass -> attendanceClass.getEndTime() != null)
                 .collect(Collectors.toList());
 
         if (attendanceClasses.size() == 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ArrayList<>();
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("追加可能なデータがありません")
+                    .ok(false)
+                    .build();
         }
 
-        return attendanceClassService.save(attendanceClasses);
-    }
-
-    @PostMapping("/admin/company/attendance-class")
-    public List<AttendanceClass> save (HttpServletResponse response,@RequestBody AttendanceClassRequest attendanceClassRequest) {
-
-        List<AttendanceClass> attendanceClasses = attendanceClassRequest.getAttendanceClasses()
-                .stream()
-                .filter(attendanceClass -> attendanceClass.getCompanyId() != null)
-                .filter(attendanceClass -> attendanceClass.getAttendanceClassCode() != null)
-                .filter(attendanceClass -> attendanceClass.getAttendanceClassName() != null)
-                .collect(Collectors.toList());
-
-        if (attendanceClasses.size() == 0) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return null;
+        int savedCount = 0;
+        for (AttendanceClass a : attendanceClasses) {
+            Object result = attendanceClassService.save(a);
+            if (result instanceof String) {
+                return CrudResponse.builder()
+                        .number(savedCount)
+                        .message(result.toString())
+                        .ok(false)
+                        .build();
+            }
+            savedCount ++;
         }
-
-        return attendanceClassService.save(attendanceClasses);
+        return CrudResponse.builder()
+                .number(savedCount)
+                .message(savedCount + "件")
+                .ok(true)
+                .build();
     }
+
+//    @PostMapping("/admin/company/attendance-class")
+//    public List<AttendanceClass> save (HttpServletResponse response,@RequestBody AttendanceClassRequest attendanceClassRequest) {
+//
+//        List<AttendanceClass> attendanceClasses = attendanceClassRequest.getAttendanceClasses()
+//                .stream()
+//                .filter(attendanceClass -> attendanceClass.getCompanyId() != null)
+//                .filter(attendanceClass -> attendanceClass.getAttendanceClassCode() != null)
+//                .filter(attendanceClass -> attendanceClass.getAttendanceClassName() != null)
+//                .collect(Collectors.toList());
+//
+//        if (attendanceClasses.size() == 0) {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            return null;
+//        }
+//
+//        return attendanceClassService.save(attendanceClasses);
+//    }
 
     @DeleteMapping({"/companies/{companyId}/classes","/companies/{companyId}/classes/{attendanceClassCode}"})
-    public String delete (HttpServletRequest request,HttpServletResponse response,
+    public CrudResponse delete (HttpServletRequest request,HttpServletResponse response,
                           @PathVariable(value = "companyId") Integer companyId,
                           @PathVariable(value = "attendanceClassCode",required = false) String attendanceClassCode) {
 
@@ -129,7 +162,11 @@ public class AttendanceClassController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
         }
 
         AttendanceClass attendanceClass = AttendanceClass.builder()
@@ -138,16 +175,33 @@ public class AttendanceClassController {
                 .build();
         List<AttendanceClass> attendanceClasses = attendanceClassService.find(attendanceClass);
 
+        if (attendanceClasses.size() == 0) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("削除可能なデータはありません")
+                    .ok(false)
+                    .build();
+        }
+
         int deletedCount = 0;
         for (AttendanceClass a : attendanceClasses) {
             String deleteRet = attendanceClassService.delete(a);
             deletedCount ++;
             if (deleteRet.length() > 0) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return deletedCount + "件目エラー";
+                return CrudResponse.builder()
+                        .number(deletedCount)
+                        .message(deleteRet)
+                        .ok(false)
+                        .build();
             }
         }
-        return deletedCount +"件削除";
+        return CrudResponse.builder()
+                .number(deletedCount)
+                .message(deletedCount + "件削除")
+                .ok(true)
+                .build();
     }
 
     @DeleteMapping("/admin/company/attendance-class")

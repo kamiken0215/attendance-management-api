@@ -44,15 +44,16 @@ public class AttendanceClassService {
         );
     }
 
-    public List<AttendanceClass> save (List<AttendanceClass> attendanceClassList) {
+    public Object save (AttendanceClass attendanceClass) {
         try {
             log.severe(EXECUTE_SQL);
-            return attendanceClassRepository.saveAll(attendanceClassList);
+            return attendanceClassRepository.save(attendanceClass);
         } catch (Throwable t) {
             log.severe(t.toString());
-            return new ArrayList<>();
+            return "error";
         }
     }
+
 
     public String delete (AttendanceClass attendanceClass) {
         try {
