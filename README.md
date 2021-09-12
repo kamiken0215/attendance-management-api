@@ -95,19 +95,19 @@ Example:
 ```json
 [
   {
-    "companyId"   : 1,
-    "companyName" : "sample",
-    "departments" : [
+    "companyId": 1,
+    "companyName": "sample",
+    "departments": [
       {
-        "departmentCode"  : 101,
-        "departmentName"  : "管理部"
+        "departmentCode": 101,
+        "departmentName": "管理部"
       },
       {
-        "departmentCode"  : 102,
-        "departmentName"  : "営業部"
+        "departmentCode": 102,
+        "departmentName": "営業部"
       }
     ],
-    "error" : null
+    "error": null
   }
 ]
 ```
@@ -126,8 +126,8 @@ Example:
 
 ```json
 {
-  "companyId"   : 1,
-  "companyName" : "sample"
+  "companyId": 1,
+  "companyName": "sample"
 }
 ```
 
@@ -181,16 +181,16 @@ Example:
 
 ```json
 {
-  "departments" : [
+  "departments": [
       {
-        "companyId"       : 1,
-        "departmentCode"  : 101,
-        "departmentName"  : "管理部"
+        "companyId": 1,
+        "departmentCode": 101,
+        "departmentName": "管理部"
       },
       {
-        "companyId"       : 1,
-        "departmentCode"  : 102,
-        "departmentName"  : "営業部"
+        "companyId": 1,
+        "departmentCode": 102,
+        "departmentName": "営業部"
       }
   ],
   "error" : null
@@ -216,15 +216,16 @@ Example:
 ```json
 [
     {
-      "companyId"       : 1,
-      "departmentCode"  : 101,
-      "departmentName"  : "管理部",
-      "error"           : null
+      "companyId": 1,
+      "departmentCode": 101,
+      "departmentName": "管理部",
+      "error": null
     }
 ]
 ```
 
 ### POST
+
 - 追加
 
 所属している会社の部門名を追加できます。
@@ -239,14 +240,14 @@ Example:
 ```json
 [
   {
-    "companyId"       : 1,
-    "departmentCode"  : "201",
-    "departmentName"  : "総務部"
+    "companyId": 1,
+    "departmentCode": "201",
+    "departmentName": "総務部"
   },
   {
-    "companyId"       : 1,
-    "departmentCode"  : "301",
-    "departmentName"  : "経理部"
+    "companyId": 1,
+    "departmentCode": "301",
+    "departmentName": "経理部"
   }
 ]
 ```
@@ -269,9 +270,9 @@ Example:
 
 ```json
 {
-  "companyId"       : 1,
-  "departmentCode"  : "101",
-  "departmentName"  : "CHANGE"
+  "companyId": 1,
+  "departmentCode": "101",
+  "departmentName": "CHANGE"
 }
 ```
 
@@ -279,7 +280,7 @@ Example:
 
 共通事項　POST/DELETEメソッドのレスポンス参考
 
-###DELETE
+### DELETE
 
 所属している会社を削除できます。<br>
 削除するためには、紐づいている以下のデータを先に削除する必要があります。
@@ -464,7 +465,7 @@ Example:
 
 共通事項　POST/DELETEメソッドのレスポンス参考
 
-###DELETE
+### DELETE
 
 所属している会社を削除できます。<br>
 削除するためには、紐づいている以下のデータを先に削除する必要があります。
@@ -599,7 +600,7 @@ Example:
 
 共通事項　POST/DELETEメソッドのレスポンス参考
 
-###DELETE
+### DELETE
 
 所属している会社を削除できます。<br>
 削除するためには、紐づいている以下のデータを先に削除する必要があります。
@@ -859,7 +860,7 @@ Example:
 
 共通事項　POST/DELETEメソッドのレスポンス参考
 
-###DELETE
+### DELETE
 
 所属している会社のユーザーの出勤データを削除できます。<br>
 削除するためには、紐づいている以下のデータを先に削除する必要があります。
