@@ -48,9 +48,6 @@ public class CompanyController {
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return CompanyResponse.builder()
-                    .companyId(null)
-                    .companyName("")
-                    .departments(new HashSet<>())
                     .error("不正なユーザーです")
                     .build();
         }
@@ -60,9 +57,6 @@ public class CompanyController {
         if (result == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return CompanyResponse.builder()
-                    .companyId(null)
-                    .companyName("")
-                    .departments(new HashSet<>())
                     .error("みつかりませんでした")
                     .build();
         } else {
@@ -74,10 +68,10 @@ public class CompanyController {
         }
     }
 
-    @GetMapping("admin/company")
-    public List<Company> find (@RequestBody CompanyRequest companyRequest) {
-        return companyService.find(companyRequest);
-    }
+//    @GetMapping("admin/company")
+//    public List<Company> find (@RequestBody CompanyRequest companyRequest) {
+//        return companyService.find(companyRequest);
+//    }
 
     @PostMapping("/companies")
     public CrudResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
