@@ -26,7 +26,7 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     @GetMapping({"/companies/{companyId}/departments","/companies/{companyId}/departments/{departmentCode}"})
-    public List<Department> find (HttpServletRequest request,HttpServletResponse response,
+    public DepartmentResponse find (HttpServletRequest request,HttpServletResponse response,
                                   @PathVariable(value = "companyId") Integer companyId,
                                   @PathVariable(value = "departmentCode",required = false) String departmentCode)  {
         String token = request.getHeader("Authorization").substring(7);
@@ -42,7 +42,9 @@ public class DepartmentController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return new ArrayList<>();
+            return DepartmentResponse.builder()
+                    .error("不正なユーザー")
+                    .build();
         }
 
         Department department = Department.builder()
@@ -50,7 +52,17 @@ public class DepartmentController {
                 .departmentCode(departmentCode)
                 .build();
 
-        return departmentService.find(department);
+        List<Department> departments = departmentService.find(department);
+
+        if (departments.size() == 0) {
+            return DepartmentResponse.builder()
+                    .error("データがありません")
+                    .build();
+        }
+
+        return DepartmentResponse.builder()
+                .departments(departments)
+                .build();
     }
 
     @GetMapping("/admin/company/department")
