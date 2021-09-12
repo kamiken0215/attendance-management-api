@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Time;
 import java.util.Set;
 
 @Entity
@@ -27,6 +28,12 @@ public class AttendanceClass {
 
     @Column(name = "attendance_class_name")
     private String attendanceClassName;
+
+    @Column(name = "start_time")
+    private Time startTime;
+
+    @Column(name = "end_time")
+    private Time endTime;
 
 
 }
