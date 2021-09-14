@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
@@ -41,6 +42,14 @@ public class AttendanceController {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            List<AttendanceResponse> ret = new ArrayList<>();
+            AttendanceResponse a = AttendanceResponse.builder().error("不正なトークンです").build();
+            ret.add(a);
+            return ret;
+        }
+
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
                 .companyId(companyId)
@@ -51,7 +60,18 @@ public class AttendanceController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            List<AttendanceResponse> ret = new ArrayList<>();
+            AttendanceResponse a = AttendanceResponse.builder().error("不正なユーザーです").build();
+            ret.add(a);
+            return ret;
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_ONLY_READ)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            List<AttendanceResponse> ret = new ArrayList<>();
+            AttendanceResponse a = AttendanceResponse.builder().error("権限がありません").build();
+            ret.add(a);
+            return ret;
         }
 
         //  単一ユーザーの場合
@@ -108,21 +128,19 @@ public class AttendanceController {
         return attendanceResponses;
     }
 
-//    @GetMapping("admin/attendance")
-//    public List<AttendanceView> find (@RequestBody AttendanceRequest attendanceRequest) {
-//        AttendanceView attendance = AttendanceView.builder()
-//                .userId(attendanceRequest.getUserId())
-//                .attendanceDate(attendanceRequest.getAttendanceDate())
-//                .attendanceClassCode(attendanceRequest.getAttendanceClassCode())
-//                .attendanceStatusCode(attendanceRequest.getAttendanceStatusCode())
-//                .build();
-//        return attendanceService.find(attendance);
-//    }
-
     @PostMapping("/attendances")
     public CrudResponse saveAttendance (HttpServletRequest request, HttpServletResponse response, @RequestBody AttendanceRequest attendanceRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
+
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build();
+        }
 
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
@@ -137,6 +155,15 @@ public class AttendanceController {
             return CrudResponse.builder()
                     .number(0)
                     .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_READ_WRITE)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
                     .ok(false)
                     .build();
         }
@@ -179,36 +206,6 @@ public class AttendanceController {
                 .build();
     }
 
-//    @PostMapping("admin/attendance")
-//    public AttendanceResponse saveAttendance (@RequestBody AttendanceRequest attendanceRequest) {
-//
-//
-//
-//        Attendance attendance = new Attendance();
-//        attendance.setUserId(attendanceRequest.getUserId());
-//        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-//        attendance.setStartTime(attendanceRequest.getStartTime());
-//        attendance.setEndTime(attendanceRequest.getEndTime());
-//        attendance.setAttendanceClassCode(attendanceRequest.getAttendanceClassCode());
-//        attendance.setAttendanceStatusCode(attendanceRequest.getAttendanceStatusCode());
-//
-//        Object result = attendanceService.save(attendance);
-//
-//        if (result instanceof Attendance) {
-//            Attendance a = (Attendance) result;
-//            return AttendanceResponse.builder()
-//                    .userId(a.getUserId())
-//                    .attendanceDate(a.getAttendanceDate())
-//                    .startTime(a.getStartTime())
-//                    .endTime(a.getEndTime())
-//                    .attendanceClassCode(a.getAttendanceClassCode())
-//                    .attendanceStatusCode(a.getAttendanceStatusCode())
-//                    .build();
-//        } else {
-//            return AttendanceResponse.builder().error(result.toString()).build();
-//        }
-//    }
-
     @DeleteMapping({"companies/{companyId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
@@ -220,6 +217,15 @@ public class AttendanceController {
                                   @PathVariable(value = "attendanceDate",required = false) String attendanceDate) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
+
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build();
+        }
 
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
@@ -234,6 +240,15 @@ public class AttendanceController {
             return CrudResponse.builder()
                     .number(0)
                     .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_READ_WRITE)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
                     .ok(false)
                     .build();
         }
@@ -338,14 +353,5 @@ public class AttendanceController {
                 .message(deletedCount + "件削除")
                 .ok(true)
                 .build();
-    }
-
-    @DeleteMapping("admin/attendance")
-    public void deleteAttendance (@RequestBody AttendanceRequest attendanceRequest) {
-//        Attendance attendance = new Attendance();
-//        attendance.setUserId(attendanceRequest.getUserId());
-//        attendance.setAttendanceDate(attendanceRequest.getAttendanceDate());
-//        List<Attendance> attendances = attendanceService.find(attendance);
-//        attendanceService.deleteAll(attendances);
     }
 }

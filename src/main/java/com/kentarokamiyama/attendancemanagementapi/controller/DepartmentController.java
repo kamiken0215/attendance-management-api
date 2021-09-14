@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +32,13 @@ public class DepartmentController {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return DepartmentResponse.builder()
+                    .error("不正なトークンです")
+                    .build();
+        }
+
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
                 .companyId(companyId)
@@ -44,6 +51,13 @@ public class DepartmentController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return DepartmentResponse.builder()
                     .error("不正なユーザー")
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return DepartmentResponse.builder()
+                    .error("権限がありません")
                     .build();
         }
 
@@ -65,16 +79,19 @@ public class DepartmentController {
                 .build();
     }
 
-    @GetMapping("/admin/company/department")
-    public List<Department> find (@RequestBody DepartmentRequest departmentRequest) {
-       // return departmentService.find(departmentRequest);
-        return null;
-    }
-
     @PostMapping("/departments")
     public CrudResponse save (HttpServletRequest request, HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
+
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build();
+        }
 
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
@@ -92,6 +109,16 @@ public class DepartmentController {
                     .ok(false)
                     .build();
         }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE_SETTING)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
+                    .ok(false)
+                    .build();
+        }
+
         List<Department> departments = departmentRequest.getDepartments()
                 .stream()
                 .filter(department -> department.getCompanyId() != null)
@@ -127,29 +154,21 @@ public class DepartmentController {
                 .build();
     }
 
-//    @PostMapping("admin/company/department")
-//    public List<Department> save (HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
-//
-//        List<Department> departments = departmentRequest.getDepartments()
-//                .stream()
-//                .filter(department -> department.getCompanyId() != null)
-//                .filter(department -> department.getDepartmentCode() != null)
-//                .filter(department -> department.getDepartmentName() != null)
-//                .collect(Collectors.toList());
-//
-//        if (departments.size() == 0) {
-//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-//            return null;
-//        }
-//        return departmentService.save(departments);
-//    }
-
     @DeleteMapping({"/companies/{companyId}/departments","/companies/{companyId}/departments/{departmentCode}"})
     public CrudResponse delete (HttpServletRequest request,HttpServletResponse response,
                           @PathVariable(value = "companyId") Integer companyId,
                           @PathVariable(value = "departmentCode",required = false) String departmentCode) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
+
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build();
+        }
 
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
@@ -164,6 +183,15 @@ public class DepartmentController {
             return CrudResponse.builder()
                     .number(0)
                     .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE_SETTING)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
                     .ok(false)
                     .build();
         }
@@ -202,12 +230,5 @@ public class DepartmentController {
                 .message(deletedCount + "件削除")
                 .ok(true)
                 .build();
-    }
-
-    @DeleteMapping("/admin/company/department")
-    public String delete (HttpServletResponse response, @RequestBody DepartmentRequest departmentRequest) {
-        //List<Department> departments = departmentService.find(departmentRequest);
-        //departmentService.delete(departments);
-        return "";
     }
 }

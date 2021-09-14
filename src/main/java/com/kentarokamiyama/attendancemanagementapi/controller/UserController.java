@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
@@ -37,6 +38,10 @@ public class UserController {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return UserResponse.builder().error("不正なトークンです").build();
+        }
 
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
@@ -48,14 +53,23 @@ public class UserController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
+            return UserResponse.builder().error("不正なユーザーです").build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_ONLY_READ)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return UserResponse.builder()
+                    .error("権限がありません")
+                    .build();
         }
 
         //  本人確認
         if (userId != null) {
             if (!userId.equals(loginUser.getUserId())) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return null;
+                return UserResponse.builder()
+                        .error("不正なユーザーです")
+                        .build();
             }
         }
 
@@ -91,70 +105,20 @@ public class UserController {
                 .build();
     }
 
-//    @PostMapping("/users")
-//    public UserResponse save (HttpServletRequest request,HttpServletResponse response,@RequestBody UserRequest userRequest) {
-//
-//        String token = request.getHeader("Authorization").substring(7);
-//        String email = jwtProvider.getLoginFromToken(token);
-//
-//        User loginUser = User.builder()
-//                .userId(userRequest.getUserId())
-//                .companyId(userRequest.getCompanyId())
-//                .email(email)
-//                .build();
-//
-//        User authUser = userService.findOne(loginUser);
-//
-//        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
-//        if(authUser == null) {
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            return null;
-//        }
-//
-//        //  本人確認
-//        if (userRequest.getUserId() != null) {
-//            if (!userRequest.getUserId().equals(authUser.getUserId())) {
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                return null;
-//            }
-//        }
-//
-//        User user = User.builder()
-//                .userId(userRequest.getUserId())
-//                .userName(userRequest.getUserName())
-//                .email(userRequest.getEmail())
-//                .password(passwordEncoder.encode(userRequest.getPassword()))
-//                .paidHolidays(userRequest.getPaidHolidays())
-//                .isActive(userRequest.getIsActive())
-//                .companyId(userRequest.getCompanyId())
-//                .departmentCode(userRequest.getDepartmentCode())
-//                .roleCode(userRequest.getRoleCode())
-//                .build();
-//
-//        Object result = userService.save(user);
-//
-//        if (result instanceof User) {
-//            User u = (User) result;
-//            return UserResponse.builder()
-//                    .userId(u.getUserId())
-//                    .userName(u.getUserName())
-//                    .companyId(u.getCompanyId())
-//                    .departmentCode(u.getDepartmentCode())
-//                    .email(u.getEmail())
-//                    .isActive(u.getIsActive())
-//                    .paidHolidays(u.getPaidHolidays())
-//                    .roleCode(u.getRoleCode())
-//                    .build();
-//        } else {
-//            return UserResponse.builder().error(result.toString()).build();
-//        }
-//    }
-
     @PostMapping("/users")
     public CrudResponse save (HttpServletRequest request,HttpServletResponse response,@RequestBody UserRequest userRequest) {
 
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
+
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build();
+        }
 
         User loginUser = User.builder()
                 .companyId(userRequest.getCompanyId())
@@ -170,6 +134,15 @@ public class UserController {
             return CrudResponse.builder()
                     .number(0)
                     .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.USER_READ_WRITE)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
                     .ok(false)
                     .build();
         }
@@ -227,38 +200,6 @@ public class UserController {
                 .build();
     }
 
-//    @PostMapping("/admin/users")
-//    public UserResponse saveAll (@RequestBody UserRequest userRequest) {
-//
-//        User user = new User();
-//        user.setUserName(userRequest.getUserName());
-//        user.setEmail(userRequest.getEmail());
-//        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-//        user.setPaidHolidays(userRequest.getPaidHolidays());
-//        user.setIsActive(userRequest.getIsActive());
-//        user.setCompanyId(userRequest.getCompanyId());
-//        user.setDepartmentCode(userRequest.getDepartmentCode());
-//        user.setRoleCode(userRequest.getRoleCode());
-//
-//        Object result = userService.save(user);
-//
-//        if (result instanceof User) {
-//            User u = (User) result;
-//            return UserResponse.builder()
-//                    .userId(u.getUserId())
-//                    .userName(u.getUserName())
-//                    .companyId(u.getCompanyId())
-//                    .departmentCode(u.getDepartmentCode())
-//                    .email(u.getEmail())
-//                    .isActive(u.getIsActive())
-//                    .paidHolidays(u.getPaidHolidays())
-//                    .roleCode(u.getRoleCode())
-//                    .build();
-//        } else {
-//            return UserResponse.builder().error(result.toString()).build();
-//        }
-//    }
-
     //  自社の社員の削除
     @DeleteMapping({"companies/{companyId}/users",
             "companies/{companyId}/departments/{departmentCode}/users",
@@ -271,6 +212,15 @@ public class UserController {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .message("不正なトークンです")
+                    .ok(false)
+                    .build()
+                    .toJson();
+        }
+
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
                 .companyId(companyId)
@@ -280,6 +230,15 @@ public class UserController {
         User authUser = userService.findOne(loginUser);
 
         if(authUser == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .message("不正なユーザー")
+                    .ok(false)
+                    .build()
+                    .toJson();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.USER_READ_WRITE_SETTING)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return CrudResponse.builder()
                     .message("不正なユーザー")
@@ -324,15 +283,6 @@ public class UserController {
                 .build()
                 .toJson();
     }
-
-//    @DeleteMapping("/admin/users")
-//    public void deleteUser (@RequestBody UserRequest userRequest) {
-//        User user = new User();
-//        user.setCompanyId(userRequest.getCompanyId());
-//        user.setDepartmentCode(userRequest.getDepartmentCode());
-//        user.setUserId(userRequest.getUserId());
-//        String result = userService.delete(user);
-//    }
 
     protected enum Active {
         on,off

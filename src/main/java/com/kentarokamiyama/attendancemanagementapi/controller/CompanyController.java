@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
+import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.*;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +37,11 @@ public class CompanyController {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 
+        if (!(email.length() > 0)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CompanyResponse.builder().error("不正なトークンです").build();
+        }
+
         //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
         User loginUser = User.builder()
                 .companyId(companyId)
@@ -47,8 +52,13 @@ public class CompanyController {
 
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CompanyResponse.builder().error("不正なユーザーです").build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return CompanyResponse.builder()
-                    .error("不正なユーザーです")
+                    .error("権限がありません")
                     .build();
         }
 
@@ -68,11 +78,6 @@ public class CompanyController {
         }
     }
 
-//    @GetMapping("admin/company")
-//    public List<Company> find (@RequestBody CompanyRequest companyRequest) {
-//        return companyService.find(companyRequest);
-//    }
-
     @PostMapping("/companies")
     public CrudResponse saveCompany (HttpServletRequest request, HttpServletResponse response, @RequestBody CompanyRequest companyRequest) {
         String token = request.getHeader("Authorization").substring(7);
@@ -91,6 +96,15 @@ public class CompanyController {
             return CrudResponse.builder()
                     .number(0)
                     .message("不正なユーザーです")
+                    .ok(false)
+                    .build();
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE_SETTING)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
                     .ok(false)
                     .build();
         }
@@ -119,23 +133,6 @@ public class CompanyController {
         }
     }
 
-    @PostMapping("admin/company")
-    public CompanyResponse saveCompany (@RequestBody CompanyRequest companyRequest) {
-        Company company = new Company();
-        company.setCompanyName(companyRequest.getCompanyName());
-        Object result = companyService.save(company);
-        if (result instanceof Company) {
-            Company c = (Company) result;
-            return CompanyResponse.builder()
-                    .companyId(c.getCompanyId())
-                    .companyName(c.getCompanyName())
-                    //.departments(c.getDepartment())
-                    .build();
-        } else {
-            return CompanyResponse.builder().error(result.toString()).build();
-        }
-    }
-
     @DeleteMapping("/companies/{companyId}")
     public CrudResponse deleteCompany (HttpServletRequest request,HttpServletResponse response,
                                  @PathVariable(value = "companyId") Integer companyId) {
@@ -153,6 +150,15 @@ public class CompanyController {
         if(authUser == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
+        }
+
+        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE_SETTING)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return CrudResponse.builder()
+                    .number(0)
+                    .message("権限がありません")
+                    .ok(false)
+                    .build();
         }
 
         String checkResult = beforeCompanyDelete(companyId,email);
