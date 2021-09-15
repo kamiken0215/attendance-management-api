@@ -42,7 +42,7 @@ public class JwtProvider {
         try {
             Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
             return claims.getSubject();
-        } catch (ExpiredJwtException e) {
+        } catch (Exception e) {
             log.severe(e.toString());
             return "";
         }
