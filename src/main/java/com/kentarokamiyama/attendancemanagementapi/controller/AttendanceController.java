@@ -90,7 +90,6 @@ public class AttendanceController {
                 AttendanceResponse resp = AttendanceResponse.builder()
                         .userId(attendances.get(0).getUserId())
                         .attendances(attendances)
-                        .error("")
                         .build();
                 attendanceResponses.add(resp);
             }
@@ -119,7 +118,6 @@ public class AttendanceController {
                 AttendanceResponse resp = AttendanceResponse.builder()
                         .userId(attendances.get(0).getUserId())
                         .attendances(attendances)
-                        .error("")
                         .build();
                 attendanceResponses.add(resp);
             }
