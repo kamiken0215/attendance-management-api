@@ -23,8 +23,4 @@ public class AttendanceStatus {
     @Column(name = "attendance_status_name")
     private String attendanceStatusName;
 
-    @OneToMany
-    @JoinColumn(name = "attendance_status_code",updatable = false)
-    private Set<Attendance> attendances;
-
 }
