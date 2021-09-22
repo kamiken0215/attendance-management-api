@@ -510,6 +510,48 @@ none
 共通事項　POST/DELETEメソッドのレスポンス参考
 
 
+## ATTENDANCE STATUS
+
+出勤データのステータス一覧を取得できます。
+GETのみ提供されています。
+(要Bearer token)
+
+### GET
+
+**Request:**
+
+`/status`
+
+**Data:**
+
+none
+
+**Response:**
+
+```json
+{
+   "attendanceStatuses": [
+      {
+         "attendanceStatusCode": "101",
+         "attendanceStatusName": "on"
+      },
+      {
+         "attendanceStatusCode": "102",
+         "attendanceStatusName": "keep"
+      },
+      {
+         "attendanceStatusCode": "201",
+         "attendanceStatusName": "off"
+      },
+      {
+         "attendanceStatusCode": "202",
+         "attendanceStatusName": "reject"
+      }
+   ],
+   "error": null
+}
+```
+
 ## ATTENDANCE CLASS
 
 ### GET
