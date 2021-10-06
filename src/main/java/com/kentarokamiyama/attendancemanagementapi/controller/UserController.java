@@ -182,7 +182,7 @@ public class UserController {
                         .ok(false)
                         .build();
             }
-            User existUser = userService.findOne(u);
+            User existUser = userService.findById(u.getUserId()).orElse(null);
 
             Object result;
             if (existUser != null) {
