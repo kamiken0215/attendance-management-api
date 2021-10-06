@@ -355,7 +355,8 @@ Example:
             "companyName": "tt",
             "departmentCode": "101",
             "departmentName": "管理部門3",
-            "roleCode": "7777"
+            "roleCode": "7777",
+            "roleName": "ROLE_ADMIN"
         },
         {
             "userId": 34,
@@ -367,7 +368,8 @@ Example:
             "companyName": "tt",
             "departmentCode": "102",
             "departmentName": "総務部3",
-            "roleCode": "7777"
+            "roleCode": "7777",
+            "roleName": "ROLE_ADMIN"
         }
     ],
     "error": null
