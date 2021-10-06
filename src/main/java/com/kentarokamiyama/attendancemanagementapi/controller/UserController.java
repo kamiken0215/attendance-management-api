@@ -85,6 +85,7 @@ public class UserController {
         for (User u:users) {
             assert u.getCompany() != null;
             assert u.getDepartment() != null;
+            assert u.getRole() != null;
             UserResponseModel model = UserResponseModel.builder()
                     .userId(u.getUserId())
                     .userName(u.getUserName())
@@ -96,6 +97,7 @@ public class UserController {
                     .isActive(u.getIsActive())
                     .paidHolidays(u.getPaidHolidays())
                     .roleCode(u.getRoleCode())
+                    .roleName((u.getRole().getRoleName()))
                     .build();
             userResponseModels.add(model);
         }

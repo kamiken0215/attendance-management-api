@@ -29,4 +29,6 @@ public class UserResponseModel {
     private String departmentName;
 
     private String roleCode;
+
+    private String roleName;
 }
