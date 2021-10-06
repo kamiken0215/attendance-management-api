@@ -509,6 +509,77 @@ none
 
 共通事項　POST/DELETEメソッドのレスポンス参考
 
+## Role
+
+権限一覧を取得できます。
+GETのみ提供されています。
+(要Bearer token)
+
+### GET
+
+**Request:**
+
+`/roles`
+
+**Data:**
+
+none
+
+**Response:**
+
+```json
+{
+   "roles": [
+      {
+         "roleCode": "7777",
+         "roleName": "ROLE_ADMIN",
+         "explanation": "全ての実行権限あり"
+      },
+      {
+         "roleCode": "0777",
+         "roleName": "ROLE_COMPANY",
+         "explanation": "会社情報の設定以下の全権限"
+      },
+      {
+         "roleCode": "0677",
+         "roleName": "ROLE_COMPANY",
+         "explanation": "会社情報の編集以下の全権限"
+      },
+      {
+         "roleCode": "0077",
+         "roleName": "ROLE_USER",
+         "explanation": "ユーザーの設定以下の全権限"
+      },
+      {
+         "roleCode": "0067",
+         "roleName": "ROLE_USER",
+         "explanation": "ユーザーの登録/編集以下の権限"
+      },
+      {
+         "roleCode": "0047",
+         "roleName": "ROLE_USER",
+         "explanation": "ユーザーの参照"
+      },
+      {
+         "roleCode": "0007",
+         "roleName": "ROLE_ATTENDANCE",
+         "explanation": "出勤データの設定以下の全権限"
+      },
+      {
+         "roleCode": "0006",
+         "roleName": "ROLE_ATTENDANCE",
+         "explanation": "自分の出勤データの登録/編集のみ"
+      },
+      {
+         "roleCode": "0004",
+         "roleName": "ROLE_ATTENDANCE",
+         "explanation": "自分の出勤データの参照のみ"
+      }
+   ],
+   "error": null
+}
+```
+
 
 ## ATTENDANCE STATUS
 
