@@ -437,12 +437,15 @@ Example:
 
 所属している会社の部門名を変更できます。
 編集権限を所有している必要があります
+passwordを変更しない場合はpasswordパラメータは不要です。
 
 **Request:**
 
 `/users`
 
 **Data:**
+
+2件目のユーザーはパスワードを変更しない例です。
 
 ```json
 {
@@ -465,7 +468,6 @@ Example:
             "userId":41,
             "userName": "addtest2",
             "email": "upd@gmail.com",
-            "password":"test",
             "paidHolidays": 0,
             "isActive": "off",
             "departmentCode": "101",
