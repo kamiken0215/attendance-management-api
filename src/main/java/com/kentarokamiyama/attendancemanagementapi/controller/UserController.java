@@ -155,7 +155,7 @@ public class UserController {
                 .filter(user -> user.getDepartmentCode() != null)
                 .filter(user -> user.getUserName() != null)
                 .filter(user -> user.getEmail() != null && user.getEmail().length() > 0)
-                .filter(user -> user.getPassword() != null)
+//                .filter(user -> user.getPassword() != null)
                 .filter(user -> user.getPaidHolidays() != null)
                 .filter(user -> user.getIsActive() != null)
                 .filter(user -> user.getRoleCode() != null)
@@ -182,8 +182,25 @@ public class UserController {
                         .ok(false)
                         .build();
             }
-            u.setPassword(passwordEncoder.encode(u.getPassword()) );
-            Object result = userService.save(u);
+            User existUser = userService.findOne(u);
+
+            Object result;
+            if (existUser != null) {
+                existUser.setCompanyId(u.getCompanyId());
+                existUser.setUserId(u.getUserId());
+                existUser.setUserName(u.getUserName());
+                existUser.setEmail(u.getEmail());
+                existUser.setPaidHolidays(u.getPaidHolidays());
+                existUser.setIsActive(u.getIsActive());
+                existUser.setDepartmentCode(u.getDepartmentCode());
+                existUser.setRoleCode(u.getRoleCode());
+                if (u.getPassword() != null) {
+                    existUser.setPassword(passwordEncoder.encode(u.getPassword()));
+                }
+                result = userService.save(existUser);
+            } else {
+                result = userService.save(u);
+            }
             if (result instanceof String) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return CrudResponse.builder()
