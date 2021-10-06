@@ -25,7 +25,7 @@ public class RoleService {
 
         log.severe(EXECUTE_SQL);
         return roleRepository.findAll(
-                Sort.by(Sort.Direction.ASC,"roleCode")
+                Sort.by(Sort.Direction.DESC,"roleCode")
         );
     }
 
