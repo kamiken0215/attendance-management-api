@@ -199,6 +199,7 @@ public class UserController {
                 }
                 result = userService.save(existUser);
             } else {
+                u.setPassword(passwordEncoder.encode(u.getPassword()));
                 result = userService.save(u);
             }
             if (result instanceof String) {
@@ -218,6 +219,102 @@ public class UserController {
                 .ok(true)
                 .build();
     }
+
+//    @PostMapping("/new/users")
+//    public CrudResponse create (HttpServletRequest request,HttpServletResponse response,@RequestBody UserRequest userRequest) {
+//
+//        String token = request.getHeader("Authorization").substring(7);
+//        String email = jwtProvider.getLoginFromToken(token);
+//
+//        if (!(email.length() > 0)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return CrudResponse.builder()
+//                    .number(0)
+//                    .message("不正なトークンです")
+//                    .ok(false)
+//                    .build();
+//        }
+//
+//        User loginUser = User.builder()
+//                .companyId(userRequest.getCompanyId())
+//                .email(email)
+//                .build();
+//
+//        User authUser = userService.findOne(loginUser);
+//
+//        //  アクセスしてきたユーザーがuriに含まれるcompanyIdに所属しているかチェック
+//        if(authUser == null) {
+//            log.severe("認証エラー");
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return CrudResponse.builder()
+//                    .number(0)
+//                    .message("不正なユーザーです")
+//                    .ok(false)
+//                    .build();
+//        }
+//
+//        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.USER_READ_WRITE)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return CrudResponse.builder()
+//                    .number(0)
+//                    .message("権限がありません")
+//                    .ok(false)
+//                    .build();
+//        }
+//
+//        List<User> users = userRequest.getUsers()
+//                .stream()
+//                .filter(user -> user.getCompanyId() != null && Objects.equals(user.getCompanyId(), userRequest.getCompanyId()))
+//                .filter(user -> user.getDepartmentCode() != null)
+//                .filter(user -> user.getUserName() != null)
+//                .filter(user -> user.getEmail() != null && user.getEmail().length() > 0)
+//                .filter(user -> user.getPassword() != null)
+//                .filter(user -> user.getPaidHolidays() != null)
+//                .filter(user -> user.getIsActive() != null)
+//                .filter(user -> user.getRoleCode() != null)
+//                .collect(Collectors.toList());
+//
+//        if (users.size() == 0) {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            return CrudResponse.builder()
+//                    .number(0)
+//                    .message("追加可能なデータはありません")
+//                    .ok(false)
+//                    .build();
+//        }
+//
+//        int savedCount = 0;
+//        for (User u : users) {
+//            try {
+//                Active enm = Active.valueOf(u.getIsActive());
+//            } catch (IllegalArgumentException e) {
+//                log.severe(e.toString());
+//                return CrudResponse.builder()
+//                        .number(0)
+//                        .message("ユーザー名"+u.getUserName()+"のiaActiveをonかoffにしてください")
+//                        .ok(false)
+//                        .build();
+//            }
+//
+//            Object result = userService.save(u);
+//
+//            if (result instanceof String) {
+//                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//                return CrudResponse.builder()
+//                        .number(savedCount)
+//                        .message(result.toString())
+//                        .ok(false)
+//                        .build();
+//            }
+//            savedCount++;
+//        }
+//
+//        return CrudResponse.builder()
+//                .number(savedCount)
+//                .message(savedCount + "件")
+//                .ok(true)
+//                .build();
+//    }
 
     //  自社の社員の削除
     @DeleteMapping({"companies/{companyId}/users",

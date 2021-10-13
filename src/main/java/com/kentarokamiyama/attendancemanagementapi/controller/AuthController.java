@@ -3,11 +3,13 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.UserEntity;
+import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
 import com.kentarokamiyama.attendancemanagementapi.service.AuthService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,20 +26,52 @@ public class AuthController {
     private AuthService authService;
     @Autowired
     private JwtProvider jwtProvider;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody RegistrationRequest registrationRequest) {
+    public CrudResponse registerUser(@RequestBody UserRequest userRequest) {
+
         User u = new User();
-        u.setUserName(registrationRequest.getUserName());
-        u.setCompanyId(registrationRequest.getCompanyId());
-        u.setDepartmentCode(registrationRequest.getDepartmentCode());
-        u.setRoleCode(registrationRequest.getRoleCode());
-        u.setEmail(registrationRequest.getEmail());
-        u.setPassword(registrationRequest.getPassword());
-        u.setPaidHolidays(registrationRequest.getPaidHolidays());
-        u.setIsActive(registrationRequest.getIsActive());
-        authService.saveUser(u);
-        return "OK";
+
+        if (userRequest.getUsers().size() != 1) {
+            return CrudResponse.builder()
+                    .number(1)
+                    .message("データが不正です")
+                    .ok(false)
+                    .build();
+        }
+
+        u = userRequest.getUsers().get(0);
+
+//        u.setUserName(registrationRequest.getUserName());
+//        u.setCompanyId(registrationRequest.getCompanyId());
+//        u.setDepartmentCode(registrationRequest.getDepartmentCode());
+//        u.setRoleCode(registrationRequest.getRoleCode());
+//        u.setEmail(registrationRequest.getEmail());
+//        u.setPassword(registrationRequest.getPassword());
+//        u.setPaidHolidays(registrationRequest.getPaidHolidays());
+//        u.setIsActive(registrationRequest.getIsActive());
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
+
+        //Object result = authService.saveUser(u);
+        Object result = userService.save(u);
+
+        if (result instanceof String) {
+
+            return CrudResponse.builder()
+                    .number(1)
+                    .message(result.toString())
+                    .ok(false)
+                    .build();
+
+        } else {
+            return CrudResponse.builder()
+                    .number(1)
+                    .message("ok")
+                    .ok(true)
+                    .build();
+        }
     }
 
     @PostMapping("/auth")

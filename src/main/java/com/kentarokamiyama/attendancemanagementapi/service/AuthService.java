@@ -8,11 +8,13 @@ import com.kentarokamiyama.attendancemanagementapi.entitiy.Company;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Role;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Log
 public class AuthService {
 
     @Autowired
@@ -27,7 +29,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
 
-    public User saveUser(User user) {
+    public Object saveUser(User user) {
         Company company = companyRepository.findByCompanyId(user.getCompanyId());
         Department department = departmentRepository.findByCompanyIdDepartmentCode(user.getCompanyId(),user.getDepartmentCode());
         Role role = roleRepository.findByRoleCode(user.getRoleCode());
@@ -36,7 +38,26 @@ public class AuthService {
         user.setRole(role);
         user.setRoleCode(user.getRoleCode());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            return "不正なデータです";
+        }
+
+    }
+
+    public Object save (User user) {
+        try {
+            return userRepository.save(user);
+        } catch (Throwable t) {
+            log.severe(t.toString());
+            if (t.getCause().toString().contains("ConstraintViolationException")) {
+                return "";
+            } else {
+                return "再度時間を置いてから実行してください";
+            }
+        }
     }
 
     public User findByEmail(String email) {
