@@ -107,7 +107,6 @@ Example:
 
 ```json
 {
-  {
     "companyId": 1,
     "companyName": "sample",
     "departments": [
@@ -121,7 +120,6 @@ Example:
       }
     ],
     "error": null
-  }
 }
 ```
 
