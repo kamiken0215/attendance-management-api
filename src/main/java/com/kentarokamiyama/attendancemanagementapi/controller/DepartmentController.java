@@ -54,12 +54,12 @@ public class DepartmentController {
                     .build();
         }
 
-        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return DepartmentResponse.builder()
-                    .error("権限がありません")
-                    .build();
-        }
+//        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return DepartmentResponse.builder()
+//                    .error("権限がありません")
+//                    .build();
+//        }
 
         Department department = Department.builder()
                 .companyId(companyId)

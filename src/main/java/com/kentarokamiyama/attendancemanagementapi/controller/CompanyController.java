@@ -55,12 +55,12 @@ public class CompanyController {
             return CompanyResponse.builder().error("不正なユーザーです").build();
         }
 
-        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return CompanyResponse.builder()
-                    .error("権限がありません")
-                    .build();
-        }
+//        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.COMPANY_READ_WRITE)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return CompanyResponse.builder()
+//                    .error("権限がありません")
+//                    .build();
+//        }
 
         Company result = companyService.findOne(companyId);
 

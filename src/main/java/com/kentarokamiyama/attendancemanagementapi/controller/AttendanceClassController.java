@@ -50,10 +50,10 @@ public class AttendanceClassController {
             return AttendanceClassResponse.builder().error("不正なユーザー").build();
         }
 
-        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_ONLY_READ)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return AttendanceClassResponse.builder().error("権限がありません").build();
-        }
+//        if (!(Integer.parseInt(authUser.getRoleCode().replaceFirst("^0+", "")) >= Roles.ATTENDANCE_ONLY_READ)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return AttendanceClassResponse.builder().error("権限がありません").build();
+//        }
 
         AttendanceClass attendanceClass = AttendanceClass.builder()
                 .companyId(companyId)
