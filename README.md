@@ -106,7 +106,7 @@ Example:
 `companies/1`
 
 ```json
-[
+{
   {
     "companyId": 1,
     "companyName": "sample",
@@ -122,7 +122,7 @@ Example:
     ],
     "error": null
   }
-]
+}
 ```
 
 ### POST
