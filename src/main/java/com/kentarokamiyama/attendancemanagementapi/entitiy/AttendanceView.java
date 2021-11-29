@@ -1,6 +1,7 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.pk.AttendancePK;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

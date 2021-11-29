@@ -2,6 +2,8 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.UserRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.UserResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
@@ -30,7 +32,7 @@ public class UserController {
     @GetMapping({"companies/{companyId}/users",
             "companies/{companyId}/departments/{departmentCode}/users",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}"})
-    public UserResponse find (HttpServletRequest request,HttpServletResponse response,
+    public UserResponse find (HttpServletRequest request, HttpServletResponse response,
                               @PathVariable(value = "companyId") Integer companyId,
                               @PathVariable(value = "departmentCode",required = false) String departmentCode,
                               @PathVariable(value = "userId",required = false) Integer userId) {

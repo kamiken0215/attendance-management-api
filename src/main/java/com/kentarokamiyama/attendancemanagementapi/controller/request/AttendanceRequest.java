@@ -1,26 +1,26 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
-import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 import java.util.List;
 
-@Builder
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttendanceResponse {
+public class AttendanceRequest {
 
-    private Integer userId;
+    @NotEmpty
+    private Integer CompanyId;
 
-    private List<AttendanceView> attendances;
+    private List<Attendance> attendances;
 
-    private String error;
 }

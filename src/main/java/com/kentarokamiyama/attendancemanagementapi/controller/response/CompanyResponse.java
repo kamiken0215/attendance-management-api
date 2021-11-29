@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.response;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import lombok.AllArgsConstructor;
@@ -6,16 +6,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-@Data
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DepartmentRequest {
-    @NotEmpty
+public class CompanyResponse {
+
     private Integer companyId;
-    private List<Department> departments;
+
+    private String companyName;
+
+    private Set<Department> departments;
+
+    private String error;
 }

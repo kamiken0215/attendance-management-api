@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
+import com.kentarokamiyama.attendancemanagementapi.entitiy.pk.DepartmentPK;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

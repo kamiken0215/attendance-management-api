@@ -1,5 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.entitiy;
 
+import com.kentarokamiyama.attendancemanagementapi.entitiy.pk.AttendanceClassPK;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Time;
-import java.util.Set;
 
 @Entity
 @Builder

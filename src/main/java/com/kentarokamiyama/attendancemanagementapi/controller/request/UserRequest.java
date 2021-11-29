@@ -1,6 +1,6 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.request;
 
-import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
+import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +13,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttendanceClassRequest {
+public class UserRequest {
 
     @NotEmpty
     private Integer companyId;
 
-    private List<AttendanceClass> attendanceClasses;
+    private List<User> users;
 }

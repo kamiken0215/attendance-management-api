@@ -1,9 +1,8 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
-import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceStatus;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.RoleResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Role;
-import com.kentarokamiyama.attendancemanagementapi.service.AttendanceStatusService;
 import com.kentarokamiyama.attendancemanagementapi.service.RoleService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import lombok.extern.java.Log;
@@ -27,7 +26,7 @@ public class RoleController {
     private RoleService roleService;
 
     @GetMapping("/roles")
-    public RoleResponse find (HttpServletRequest request,HttpServletResponse response) {
+    public RoleResponse find (HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 

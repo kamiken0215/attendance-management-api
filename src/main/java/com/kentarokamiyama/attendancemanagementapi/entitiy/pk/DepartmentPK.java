@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.entitiy;
+package com.kentarokamiyama.attendancemanagementapi.entitiy.pk;
 
 import lombok.Data;
 
@@ -8,11 +8,11 @@ import java.io.Serializable;
 
 @Embeddable
 @Data
-public class AttendanceClassPK implements Serializable {
+public class DepartmentPK implements Serializable {
 
     @Column(name = "company_id")
     private Integer companyId;
 
-    @Column(name = "attendance_class_code")
-    private String attendanceClassCode;
+    @Column(name = "department_code")
+    private String departmentCode;
 }

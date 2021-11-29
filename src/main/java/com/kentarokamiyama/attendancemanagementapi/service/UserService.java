@@ -1,5 +1,4 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
-import com.kentarokamiyama.attendancemanagementapi.controller.UserRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.CompanyRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;

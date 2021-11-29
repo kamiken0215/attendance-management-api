@@ -2,6 +2,8 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.DepartmentRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.DepartmentResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
@@ -26,9 +28,9 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     @GetMapping({"/companies/{companyId}/departments","/companies/{companyId}/departments/{departmentCode}"})
-    public DepartmentResponse find (HttpServletRequest request,HttpServletResponse response,
-                                  @PathVariable(value = "companyId") Integer companyId,
-                                  @PathVariable(value = "departmentCode",required = false) String departmentCode)  {
+    public DepartmentResponse find (HttpServletRequest request, HttpServletResponse response,
+                                    @PathVariable(value = "companyId") Integer companyId,
+                                    @PathVariable(value = "departmentCode",required = false) String departmentCode)  {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 

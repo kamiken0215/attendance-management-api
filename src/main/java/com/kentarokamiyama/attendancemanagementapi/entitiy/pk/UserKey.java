@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.entitiy;
+package com.kentarokamiyama.attendancemanagementapi.entitiy.pk;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;

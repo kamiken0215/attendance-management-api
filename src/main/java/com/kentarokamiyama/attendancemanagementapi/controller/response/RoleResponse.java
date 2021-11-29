@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.response;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceStatus;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Role;

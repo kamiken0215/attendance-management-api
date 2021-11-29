@@ -1,20 +1,15 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
 
-import com.kentarokamiyama.attendancemanagementapi.controller.DepartmentRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.DepartmentRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 

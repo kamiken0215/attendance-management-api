@@ -2,6 +2,8 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.CompanyRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.CompanyResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.*;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.service.*;
@@ -33,7 +35,7 @@ public class CompanyController {
 
     @GetMapping("/companies/{companyId}")
     public CompanyResponse find (HttpServletRequest request, HttpServletResponse response,
-                                       @PathVariable(value = "companyId") Integer companyId) {
+                                 @PathVariable(value = "companyId") Integer companyId) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 

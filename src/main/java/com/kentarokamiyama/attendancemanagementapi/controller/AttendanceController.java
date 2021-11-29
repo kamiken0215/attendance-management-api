@@ -2,6 +2,8 @@ package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.Roles;
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.AttendanceRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.AttendanceResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
@@ -34,11 +36,11 @@ public class AttendanceController {
             "companies/{companyId}/departments/{departmentCode}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances",
             "companies/{companyId}/departments/{departmentCode}/users/{userId}/attendances/{attendanceDate}"})
-    public List<AttendanceResponse> find (HttpServletRequest request,HttpServletResponse response,
-                                  @PathVariable(value = "companyId") Integer companyId,
-                                  @PathVariable(value = "departmentCode",required = false) String departmentCode,
-                                  @PathVariable(value = "userId",required = false) Integer userId,
-                                  @PathVariable(value = "attendanceDate",required = false) String attendanceDate) {
+    public List<AttendanceResponse> find (HttpServletRequest request, HttpServletResponse response,
+                                          @PathVariable(value = "companyId") Integer companyId,
+                                          @PathVariable(value = "departmentCode",required = false) String departmentCode,
+                                          @PathVariable(value = "userId",required = false) Integer userId,
+                                          @PathVariable(value = "attendanceDate",required = false) String attendanceDate) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 

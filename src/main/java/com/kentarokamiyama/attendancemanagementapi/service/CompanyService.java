@@ -1,6 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
 
-import com.kentarokamiyama.attendancemanagementapi.controller.CompanyRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.CompanyRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.*;
 import com.kentarokamiyama.attendancemanagementapi.repository.*;
 import lombok.extern.java.Log;

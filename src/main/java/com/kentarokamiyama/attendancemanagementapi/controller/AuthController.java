@@ -1,14 +1,16 @@
 package com.kentarokamiyama.attendancemanagementapi.controller;
 
 import com.kentarokamiyama.attendancemanagementapi.config.jwt.JwtProvider;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.AuthRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.request.UserRequest;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.AuthResponse;
+import com.kentarokamiyama.attendancemanagementapi.controller.response.UserResponse;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
-import com.kentarokamiyama.attendancemanagementapi.entitiy.UserEntity;
 import com.kentarokamiyama.attendancemanagementapi.model.CrudResponse;
 import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
 import com.kentarokamiyama.attendancemanagementapi.service.AuthService;
 import com.kentarokamiyama.attendancemanagementapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,7 +84,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/token")
-    public UserResponse auth(HttpServletRequest request,HttpServletResponse response) {
+    public UserResponse auth(HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtProvider.getLoginFromToken(token);
 

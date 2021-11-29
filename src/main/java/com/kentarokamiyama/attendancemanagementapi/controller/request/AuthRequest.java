@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.request;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.response;
 
 import com.kentarokamiyama.attendancemanagementapi.model.UserResponseModel;
 import lombok.AllArgsConstructor;

@@ -1,8 +1,6 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
 
-import com.kentarokamiyama.attendancemanagementapi.controller.AttendanceClassRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceClass;
-import com.kentarokamiyama.attendancemanagementapi.entitiy.User;
 import com.kentarokamiyama.attendancemanagementapi.repository.AttendanceClassRepository;
 import com.kentarokamiyama.attendancemanagementapi.repository.UserRepository;
 import lombok.extern.java.Log;
@@ -11,9 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Log

@@ -1,6 +1,5 @@
 package com.kentarokamiyama.attendancemanagementapi.service;
 
-import com.kentarokamiyama.attendancemanagementapi.controller.AttendanceRequest;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Attendance;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.AttendanceView;
 import com.kentarokamiyama.attendancemanagementapi.entitiy.User;

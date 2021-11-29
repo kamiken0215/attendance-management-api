@@ -1,4 +1,4 @@
-package com.kentarokamiyama.attendancemanagementapi.controller;
+package com.kentarokamiyama.attendancemanagementapi.controller.response;
 
 import com.kentarokamiyama.attendancemanagementapi.entitiy.Department;
 import lombok.AllArgsConstructor;
@@ -7,19 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyResponse {
+public class DepartmentResponse {
 
-    private Integer companyId;
-
-    private String companyName;
-
-    private Set<Department> departments;
+    private List<Department> departments;
 
     private String error;
 }
